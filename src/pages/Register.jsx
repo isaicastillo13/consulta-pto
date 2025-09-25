@@ -3,18 +3,23 @@ import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import headerImage from "../assets/Header.png";
 import InputField from "../components/InputField";
+import SelectField from "../components/SelectField";
 
 export default function Register() {
   return (
-    <>
-      <header>
-        <img src={headerImage} alt="imagen de punto de oro" />
-      </header>
-      <main>
-        <form action="">
-          <div>
+    <div className="container-sm h-100">
+      <div>
+        <img
+          className="img-fluid"
+          src={headerImage}
+          alt="imagen de punto de oro"
+        />
+      </div>
+      <div>
+        <form className="form d-flex align-items-center justify-content-center gap-4" action="">
+          <div className="">
             <div>
-              <h2>Registro</h2>
+              <h4>Registro</h4>
               <p>Ya estas registrado? Consultar Puntos.</p>
             </div>
             <div>
@@ -34,10 +39,34 @@ export default function Register() {
               />
             </div>
           </div>
-          <div></div>
+          <div>
+            <div>
+              <h4>Escoge 1 pregunta de seguridad</h4>
+              <p>Ya estas registrado? Consultar Puntos.</p>
+            </div>
+           <SelectField
+           className="form-select form-select-sm mb-3 rounded-pill py-3"
+           ariaLabel="Large select example"
+              options={[
+                { value: "option1", label: "Opción 1" },
+                { value: "option2", label: "Opción 2" },
+                { value: "option3", label: "Opción 3" },
+                ]}
+                defaultOption="Seleccione su pregunta de seguridad"
+              />
+                <InputField
+                  id="respuesta"
+                  label="Respuesta"
+                  className="form-control rounded-pill"
+                  placeholder="Ingrese su respuesta"
+                  required={true}
+                />
+
+
+          </div>
         </form>
-      </main>
-      <footer></footer>
-    </>
+      </div>
+      <div></div>
+    </div>
   );
 }
