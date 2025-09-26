@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import headerImage from "../assets/Header.png";
 import InputField from "../components/InputField";
 import SelectField from "../components/SelectField";
 import NavLink from "../components/NavLink";
 import Buttom from "../components/Buttom";
-import { saveUser } from "../services/userService";
+import { userService } from "../services/api";  // ← Cambia esta importación
 import { useNavigate } from "react-router-dom";
 
 export default function Register() {
@@ -15,24 +15,51 @@ export default function Register() {
     respuesta: "",
   });
 
-  const handleChange = (event) => {
-    setFormData({ ...formData, [event.target.name]: event.target.value });
-    console.log("Escribiendo:", event.target.value);
-  };
+  const [securityQuestions, setSecurityQuestions] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
+  // Cargar preguntas de seguridad al montar el componente
+  useEffect(() => {
+    const loadQuestions = async () => {
+      try {
+        const response = await userService.getSecurityQuestions();
+        setSecurityQuestions(response.data);
+      } catch (error) {
+        console.error("Error cargando preguntas:", error);
+      }
+    };
+
+    loadQuestions();
+  }, []);
+
+  const handleChange = (event) => {
+    setFormData({ ...formData, [event.target.name]: event.target.value });
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setLoading(true);
+
     try {
-      const result = await saveUser(formData);
-      console.log("Form submitted successfully:", result);
+      const result = await userService.register(formData);
+      console.log("Usuario registrado exitosamente:", result);
+      alert('¡Registro exitoso!');
       navigate("/");
     } catch (error) {
-      console.error("Error submitting form:", error);
+      console.error("Error registrando usuario:", error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Convertir preguntas al formato de SelectField
+  const questionOptions = securityQuestions.map(question => ({
+    value: question.id,
+    label: question.pregunta
+  }));
 
   return (
     <div className="container py-5" style={{ color: "#454545" }}>
@@ -90,7 +117,7 @@ export default function Register() {
           <h4 className="fw-bold" style={{ color: "#3559a1" }}>
             Escoge 1 pregunta de seguridad
           </h4>
-          <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+          <p>Selecciona una pregunta y proporciona tu respuesta.</p>
 
           <SelectField
             id="pregunta"
@@ -98,12 +125,8 @@ export default function Register() {
             value={formData.pregunta}
             onChange={handleChange}
             className="form-select form-select-sm mb-3 rounded-pill py-3"
-            ariaLabel="Large select example"
-            options={[
-              { value: "option1", label: "Opción 1" },
-              { value: "option2", label: "Opción 2" },
-              { value: "option3", label: "Opción 3" },
-            ]}
+            ariaLabel="Seleccionar pregunta de seguridad"
+            options={questionOptions}
             defaultOption="Seleccione su pregunta de seguridad"
           />
 
@@ -120,8 +143,9 @@ export default function Register() {
 
           <Buttom
             id="registerButton"
-            children={"Registrarse"}
+            children={loading ? "Registrando..." : "Registrarse"}
             className="mt-4 w-100"
+            disabled={loading}
           />
         </div>
       </form>
