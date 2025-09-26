@@ -1,16 +1,16 @@
-export async function saveUser(data) {
-// const res = await fetch("https://api.example.com/users", {
-//     method: "POST",
-//     headers: {"Content-Type": "application/json",},
-//     body: JSON.stringify(data),
-// });
-//     if (!res.ok) {
-//         throw new Error("Error saving user");
-//     }
+import supabase from "../../backend/lib/supabaseClient";
+import bcrypt from "bcryptjs";
+export async function saveUser({nombre, cedula, pregunta, respuesta}) {
+    const saltRounds = 10;
+    const hashedRespuesta = await bcrypt.hash(respuesta, saltRounds);
 
-//     return await res.json();
+    const {data, error} = await supabase
+    .from("usuarios")
+    .insert([{nombre, cedula, pregunta, respuesta: hashedRespuesta}]);
 
-
-    console.log("User data to be saved:", data);
-    return { success: true, message: "User saved successfully" };
+    if (error) {
+        console.error("Error saving user:", error);
+        throw error;
+    }
+    return data;
 }
