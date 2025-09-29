@@ -22,11 +22,9 @@ export const registerUser = async (req, res) => {
       return res.status(400).json({ error: "Faltan campos requeridos" });
     }
 
-    console.log("Datos para registro:", userData);
-
     const newUser = await createUser(userData);
     res.status(201).json(newUser);
-    console.log("Usuario registrado:", newUser);
+
   } catch (error) {
     console.log("|------Controlador de Usuarios------|");
     console.error("Error registrando usuario:", error);
