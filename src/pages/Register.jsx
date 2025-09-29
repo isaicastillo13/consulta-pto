@@ -35,6 +35,12 @@ export default function Register() {
     loadQuestions();
   }, []);
 
+    // Convertir preguntas al formato de SelectField
+  const questionOptions = securityQuestions.map(question => ({
+    value: question.id,
+    label: question.preguntas
+  }));
+
   const handleChange = (event) => {
     setFormData({ ...formData, [event.target.name]: event.target.value });
   };
@@ -49,18 +55,13 @@ export default function Register() {
       alert('¡Registro exitoso!');
       navigate("/");
     } catch (error) {
-      console.error("Error registrando usuario:", error);
       alert(`Error: ${error.message}`);
     } finally {
       setLoading(false);
     }
   };
 
-  // Convertir preguntas al formato de SelectField
-  const questionOptions = securityQuestions.map(question => ({
-    value: question.id,
-    label: question.pregunta
-  }));
+
 
   return (
     <div className="container py-5" style={{ color: "#454545" }}>
