@@ -1,6 +1,7 @@
 // Controladores (controllers) → deben expresar qué acción están respondiendo para el cliente.
 import { findSecurityQuestions } from "../services/userService.js";
 
+
 export const getSecurityQuestions = async (req, res) => {
     try{
         const questions = await findSecurityQuestions();

@@ -1,21 +1,25 @@
 // backend/server.js - CON DOTENV CORRECTO
 import express from 'express'
 import cors from 'cors'
-import { config } from 'dotenv'
+import { config } from 'dotenv';
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { Route } from 'react-router-dom'
 import userRoutes from './routes/userRoutes.js'
 
+
 // Configurar __dirname para ES modules
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
+
+config();
 
 // Cargar variables de entorno DESDE LA RAIZ del proyecto
 config({ path: path.resolve(__dirname, '../.env') })
 
 const app = express()
 const PORT = process.env.PORT || 5001
+
 
 // Middlewares
 // Configurar CORS
@@ -27,6 +31,17 @@ const corsOptions = {
 }
 app.use(cors(corsOptions))
 app.use(express.json())
+
+
+// (async () => {
+//   try {
+//     const result = await sql`SELECT NOW()`;
+//     console.log("✅ Conexión con Supabase exitosa:", result[0]);
+//   } catch (error) {
+//     console.error("❌ Error conectando a Supabase:", error.message);
+//   }
+// })();
+
 
 
 // Debug mejorado
@@ -77,7 +92,7 @@ app.use('/api/users', userRoutes)
 app.listen(PORT, () => {
     console.log('|----------------------------------------|')
     console.log('🛠️ Iniciando servidor...')
-    console.log('🔧 Variables de entorno:', process.env.DATABASE_URL ? '✅ Configuradas' : '❌ No configuradas')
+    console.log('🔧 Variables de entorno:', process.env.SUPABASE_URL ? '✅ Configuradas' : '❌ No configuradas')
     console.log(`🚀 Servidor en http://localhost:${PORT}`)
     console.log('|----------------------------------------|')
 })

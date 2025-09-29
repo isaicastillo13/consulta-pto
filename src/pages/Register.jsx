@@ -6,7 +6,6 @@ import NavLink from "../components/NavLink";
 import Buttom from "../components/Buttom";
 import { userService } from "../services/api";  // ← Cambia esta importación
 import { useNavigate } from "react-router-dom";
-import { compare } from "bcrypt";
 
 
 export default function Register() {
