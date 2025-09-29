@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import InputField from "../components/InputField";
 import sideImage from "../assets/banner.png";
 import formLogo from "../assets/form_logo.png";
@@ -8,7 +8,7 @@ import imgFooter from "../assets/Footer.png";
 import { userService } from "../services/api";  // ← Asegúrate de que esta importación es correcta
 
 export default function Login() {
-    
+
   const [formData, setFormData] = useState({
     cedula: "",
     respuesta: "",
@@ -16,6 +16,16 @@ export default function Login() {
 
   const [visible, setVisible] = useState(false);
   const [idValidated, setIdValidated] = useState(false);
+  const [validateMessage, setValidateMessage] = useState("");
+
+  useEffect(() => {
+    if(validateMessage){
+        const timer = setTimeout(() => {
+            setValidateMessage("");
+        }, 5000);
+        return () => clearTimeout(timer);
+    }
+  }, [validateMessage]);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -27,6 +37,7 @@ export default function Login() {
      setIdValidated(true);
    } catch (error) {
      console.error("Error consultando usuario:", error);
+    setValidateMessage("Cédula no encontrada. Por favor, verifica e intenta de nuevo.");
    }
   }
 
@@ -59,7 +70,7 @@ export default function Login() {
                   name="cedula"
                   label="Cédula"
                   type="text"
-                  className={`form-control rounded-pill ${idValidated ? 'is-valid' : ''}`}
+                  className={`form-control rounded-pill ${validateMessage ? 'border border-2 border-danger bg-danger' : ''}`}
                   placeholder="Ingrese su cédula"
                   value={formData.cedula}
                   onChange={(e) => setFormData({ ...formData, cedula: e.target.value })}
@@ -79,6 +90,10 @@ export default function Login() {
                   value={formData.respuesta}
                   onChange={(e) => setFormData({ ...formData, respuesta: e.target.value })}
                 />
+              </div>
+
+              <div className={`alert alert-danger ${validateMessage ? '' : 'd-none'}`} role="alert">
+                {validateMessage && <p className="text-danger">{validateMessage}</p>}
               </div>
 
               {/* Botón */}

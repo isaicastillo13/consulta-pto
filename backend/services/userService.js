@@ -20,7 +20,6 @@ export const findUserByCedula = async (cedula) => {
         .eq('cedula', cedula)
         .single()
         .limit(1)
-  .maybeSingle();
 
 
     if (error) {
