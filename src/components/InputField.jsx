@@ -12,7 +12,7 @@ export default function InputField({
   onChange,
 }) {
   return (
-    <div className="form-floating mb-3">
+    <div className="form-floating">
       <input
         id={id}
         name={name}
