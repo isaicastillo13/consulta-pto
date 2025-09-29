@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:3000/api'
+const API_BASE_URL = 'http://localhost:5001/api'
 
 export const userService = {
   // Registrar usuario
@@ -15,7 +15,6 @@ export const userService = {
       const errorData = await response.json()
       throw new Error(errorData.error || 'Error al registrar usuario')
     }
-
     return response.json()
   },
 

@@ -6,9 +6,8 @@
   "scripts": {
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview",
-    "dev": "nodemon backend/server.js",
-    "start": "node backend/server.js"
+    "dev": "vite",
+    "preview": "vite preview"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.58.0",

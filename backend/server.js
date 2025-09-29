@@ -4,6 +4,8 @@ import cors from 'cors'
 import { config } from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { Route } from 'react-router-dom'
+import userRoutes from './routes/userRoutes.js'
 
 // Configurar __dirname para ES modules
 const __filename = fileURLToPath(import.meta.url)
@@ -13,11 +15,19 @@ const __dirname = path.dirname(__filename)
 config({ path: path.resolve(__dirname, '../.env') })
 
 const app = express()
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 5001
 
 // Middlewares
-app.use(cors())
+// Configurar CORS
+const corsOptions = {
+  origin: 'http://localhost:5173', // frontend
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+}
+app.use(cors(corsOptions))
 app.use(express.json())
+
 
 // Debug mejorado
 app.get('/api/debug', (req, res) => {
@@ -35,45 +45,39 @@ app.get('/api/debug', (req, res) => {
   })
 })
 
-// Ruta de prueba SIMPLE (sin DB por ahora)
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: '✅ Servidor funcionando',
-    database: process.env.DATABASE_URL ? 'Configurada' : 'No configurada',
-    timestamp: new Date().toISOString()
-  })
-})
-
-// Ruta de registro TEMPORAL (sin DB)
-app.post('/api/register', async (req, res) => {
-  try {
-    const { name, cedula, pregunta, respuesta } = req.body
+// Routes
+app.use('/api/users', userRoutes)
+// // Ruta de registro TEMPORAL (sin DB)
+// app.post('/api/register', async (req, res) => {
+//   try {
+//     const { name, cedula, pregunta, respuesta } = req.body
     
-    console.log('📨 Datos recibidos:', { name, cedula, pregunta, respuesta })
+//     console.log('Datos recibidos:', { name, cedula, pregunta, respuesta })
     
-    if (!name || !cedula || !pregunta || !respuesta) {
-      return res.status(400).json({ error: 'Todos los campos son requeridos' })
-    }
+//     if (!name || !cedula || !pregunta || !respuesta) {
+//       return res.status(400).json({ error: 'Todos los campos son requeridos' })
+//     }
     
-    // Simulación exitosa
-    res.status(201).json({ 
-      success: true, 
-      message: 'Usuario registrado (modo prueba - DB no configurada)',
-      data: {
-        id: Date.now(),
-        nombre: name,
-        cedula: cedula,
-        fecha: new Date().toISOString()
-      }
-    })
-  } catch (error) {
-    res.status(500).json({ error: error.message })
-  }
-})
+//     // Simulación exitosa
+//     res.status(201).json({ 
+//       success: true, 
+//       message: 'Usuario registrado (modo prueba - DB no configurada)',
+//       data: {
+//         id: Date.now(),
+//         nombre: name,
+//         cedula: cedula,
+//         fecha: new Date().toISOString()
+//       }
+//     })
+//   } catch (error) {
+//     res.status(500).json({ error: error.message })
+//   }
+// })
 
 app.listen(PORT, () => {
-    console.log('----------------------------------------')
-    console.log('🛠️  Iniciando servidor...')
-  console.log('🔧 Variables de entorno:', process.env.DATABASE_URL ? '✅ Configuradas' : '❌ No configuradas')
-  console.log(`🚀 Servidor en http://localhost:${PORT}`)
+    console.log('|----------------------------------------|')
+    console.log('🛠️ Iniciando servidor...')
+    console.log('🔧 Variables de entorno:', process.env.DATABASE_URL ? '✅ Configuradas' : '❌ No configuradas')
+    console.log(`🚀 Servidor en http://localhost:${PORT}`)
+    console.log('|----------------------------------------|')
 })

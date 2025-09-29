@@ -6,6 +6,8 @@ import NavLink from "../components/NavLink";
 import Buttom from "../components/Buttom";
 import { userService } from "../services/api";  // ← Cambia esta importación
 import { useNavigate } from "react-router-dom";
+import { compare } from "bcrypt";
+
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -25,12 +27,12 @@ export default function Register() {
     const loadQuestions = async () => {
       try {
         const response = await userService.getSecurityQuestions();
-        setSecurityQuestions(response.data);
+        setSecurityQuestions(response);
+        console.log("Preguntas de seguridad cargadas:", response);
       } catch (error) {
         console.error("Error cargando preguntas:", error);
       }
     };
-
     loadQuestions();
   }, []);
 
