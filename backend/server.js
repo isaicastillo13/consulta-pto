@@ -20,7 +20,6 @@ config({ path: path.resolve(__dirname, "../.env") });
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-// Middlewares
 // Configurar CORS
 const corsOptions = {
   origin: "http://localhost:5173", // frontend
@@ -54,6 +53,7 @@ app.use("/api/security", securityRoutes);
 
 // Ruta de registro TEMPORAL (sin DB)
 app.use("/api/users", userRoutes);
+app.use("/api/auth", userRoutes);
 
 app.listen(PORT, () => {
   console.log("|----------------------------------------|");

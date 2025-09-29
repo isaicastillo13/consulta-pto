@@ -11,4 +11,22 @@ export const createUser = async (userData) => {
         throw error;
     }
     return data;
+};
+
+export const findUserByCedula = async (cedula) => {
+    const {data, error} = await supabase
+        .from('usuarios')
+        .select('*')
+        .eq('cedula', cedula)
+        .single()
+        .limit(1)
+  .maybeSingle();
+
+
+    if (error) {
+        console.log('|------Servicio de Usuarios------|')
+        console.error("Error buscando usuario por cédula:", error);
+        throw error;
+    }
+    return data;
 }

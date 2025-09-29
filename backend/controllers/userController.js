@@ -1,5 +1,6 @@
 import { createUser } from "../services/userService.js";
 import bcrypt, { hash } from "bcryptjs";
+import { findUserByCedula } from "../services/userService.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -31,3 +32,18 @@ export const registerUser = async (req, res) => {
     res.status(500).json({ error: "Error registrando usuario" });
   }
 };
+
+export const getIdUser = async (req, res) => {
+  ;
+  try{
+    const cedulaLogin = req.body.cedula;
+    const idUser = await findUserByCedula(cedulaLogin);
+    res.json(idUser);
+   
+
+  }catch(error){
+    console.log("|------Controlador de Usuarios------|");
+    console.error("Error validando cédula:", error);
+    res.status(500).json({ error: "Error validando cédula" });
+  }
+}

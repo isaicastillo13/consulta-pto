@@ -5,12 +5,30 @@ import formLogo from "../assets/form_logo.png";
 import Buttom from "../components/Buttom";
 import NavLink from "../components/NavLink";
 import imgFooter from "../assets/Footer.png";
+import { userService } from "../services/api";  // ← Asegúrate de que esta importación es correcta
 
 export default function Login() {
+    
   const [formData, setFormData] = useState({
     cedula: "",
     respuesta: "",
   });
+
+  const [visible, setVisible] = useState(false);
+  const [idValidated, setIdValidated] = useState(false);
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    // Aquí puedes agregar la lógica para manejar el envío del formulario
+   try {
+     const response = await userService.validateId(formData);
+     console.log("Usuario autenticado:", response);
+     setVisible(true);
+     setIdValidated(true);
+   } catch (error) {
+     console.error("Error consultando usuario:", error);
+   }
+  }
 
   return (
     <>
@@ -23,7 +41,7 @@ export default function Login() {
 
           {/* Columna derecha con formulario */}
           <div className="col-12 col-md-6 d-flex align-items-center">
-            <form className="w-100 px-4" style={{ maxWidth: "400px" }}>
+            <form className="w-100 px-4" style={{ maxWidth: "400px" }} onSubmit={handleSubmit}>
               <div className="text-center mb-4">
                 <img src={formLogo} alt="Logo" className="img-fluid mb-3" />
                 <h3 className="fw-bold" style={{ color: "#3559a1" }}>
@@ -41,15 +59,16 @@ export default function Login() {
                   name="cedula"
                   label="Cédula"
                   type="text"
-                  className="form-control rounded-pill"
+                  className={`form-control rounded-pill ${idValidated ? 'is-valid' : ''}`}
                   placeholder="Ingrese su cédula"
                   value={formData.cedula}
                   onChange={(e) => setFormData({ ...formData, cedula: e.target.value })}
+                  disabled={idValidated}
                 />
               </div>
 
               {/* Campo Respuesta */}
-              <div className="mb-3">
+              <div className={`mb-3 ${visible ? '' : 'd-none'}`}>
                 <InputField
                   id="respuesta"
                   name="respuesta"
@@ -63,8 +82,11 @@ export default function Login() {
               </div>
 
               {/* Botón */}
-              <Buttom id="submitBtn" className="w-100 mt-3">
+              <Buttom id="consultarBtn" className={`w-100 mt-3 ${visible ? 'd-none' : ''}`} type="submit">
                 Consultar
+              </Buttom>
+              <Buttom id="ingresarBtn" className={`w-100 mt-3 ${visible ? '' : 'd-none'}`} type="submit">
+                Ingresar
               </Buttom>
 
               {/* Link de registro */}

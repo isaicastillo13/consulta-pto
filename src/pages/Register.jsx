@@ -85,7 +85,7 @@ export default function Register() {
           <p>
             ¿Ya estás registrado?{" "}
             <NavLink
-              to="/login"
+              to="/"
               children={"Iniciar sesión"}
               className="text-decoration-none fw-bold"
             />

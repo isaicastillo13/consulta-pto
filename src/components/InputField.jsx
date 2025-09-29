@@ -10,6 +10,7 @@ export default function InputField({
   required = false,
   value,
   onChange,
+  disabled = false,
 }) {
   return (
     <div className="form-floating">
@@ -22,6 +23,7 @@ export default function InputField({
         required={required}
         value={value}
         onChange={onChange}
+        disabled={disabled}
       />
       <label htmlFor={id}>{label}</label>
     </div>
