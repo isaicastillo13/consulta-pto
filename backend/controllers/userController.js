@@ -1,6 +1,6 @@
 import { createUser } from "../services/userService.js";
 import bcrypt, { hash } from "bcryptjs";
-import { findUserByCedula } from "../services/userService.js";
+import { findUserByCedula, hashRespuesta } from "../services/userService.js";
 
 export const registerUser = async (req, res) => {
   try {
@@ -34,16 +34,47 @@ export const registerUser = async (req, res) => {
 };
 
 export const getIdUser = async (req, res) => {
-  ;
-  try{
+  try {
     const cedulaLogin = req.body.cedula;
-    const idUser = await findUserByCedula(cedulaLogin);
-    res.json(idUser);
-   
+    
+    // Validar que venga la cédula
+    if (!cedulaLogin) {
+      return res.status(400).json({ 
+        success: false,
+        error: 'La cédula es requerida' 
+      });
+    }
 
-  }catch(error){
+    // 1. Primero buscar el usuario por cédula
+    const idUser = await findUserByCedula(cedulaLogin);
+
+    // 2. Si NO viene respuesta, retornar solo los datos del usuario
+    if (!req.body.respuesta) {
+      return res.json({
+        success: true,
+        user: idUser,
+        message: 'Usuario encontrado, requiere validar respuesta'
+      });
+    }
+
+    // 3. Si VIENE respuesta, validarla
+    const respuestaLogin = req.body.respuesta;
+    const respuestaHash = await hashRespuesta(cedulaLogin, respuestaLogin);
+    
+    return res.json({
+      success: true,
+      user: idUser,
+      respuestaValidada: respuestaHash,
+      message: 'Usuario y respuesta validados correctamente'
+    });
+
+  } catch (error) {
     console.log("|------Controlador de Usuarios------|");
     console.error("Error validando cédula:", error);
-    res.status(500).json({ error: "Error validando cédula" });
+    
+    return res.status(500).json({ 
+      success: false,
+      error: "Error validando credenciales" 
+    });
   }
 }

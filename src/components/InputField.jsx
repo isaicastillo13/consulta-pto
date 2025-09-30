@@ -7,6 +7,7 @@ export default function InputField({
   type = "text",
   placeholder = "",
   className = "form-control",
+  classNameLabel = "",
   required = false,
   value,
   onChange,
@@ -25,7 +26,7 @@ export default function InputField({
         onChange={onChange}
         disabled={disabled}
       />
-      <label htmlFor={id}>{label}</label>
+      <label className={classNameLabel} htmlFor={id}>{label}</label>
     </div>
   );
 }

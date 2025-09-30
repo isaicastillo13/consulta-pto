@@ -29,7 +29,6 @@ export const userService = {
 
   // Login usuario
   async validateId(data){
-
     const response = await fetch(`${API_BASE_URL}/auth/validateid`, {
       method: "POST",
       headers: {
