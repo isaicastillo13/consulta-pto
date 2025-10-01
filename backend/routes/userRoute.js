@@ -12,6 +12,6 @@ router.post(
 );
 
 router.post("/validateid",getIdUser);
-router.post("/generate-token", getToken);
+
 
 export default router;
