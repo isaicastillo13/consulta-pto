@@ -42,5 +42,20 @@ export const userService = {
       throw new Error(errorData.error || "Error al validar cédula");
     }
     return response.json();
-  }
+  },
+
+  // async generateToken(userData){
+  //   const response = await fetch (`${API_BASE_URL}/auth/generate-token`),{
+  //     method: "POST",
+  //     headers: {
+  //       "Content-Type": "application/json",
+  //     },
+  //   });
+
+  //   if (!response.ok) {
+  //     const errorData = await response.json();
+  //     throw new Error(errorData.error || "Error al generar token");
+  //   }
+  //   return response.json();
+  // }
 };

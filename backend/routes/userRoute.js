@@ -3,6 +3,7 @@ import { registerUser } from "../controllers/userController.js";
 import { validateRequiredFields } from "../middleware/validateRequiredFields.js";
 import { getIdUser } from "../controllers/userController.js";
 
+
 const router = express.Router();
 router.post(
   "/register",
@@ -10,6 +11,7 @@ router.post(
   registerUser
 );
 
-router.post("/validateid", getIdUser);
+router.post("/validateid",getIdUser);
+router.post("/generate-token", getToken);
 
 export default router;

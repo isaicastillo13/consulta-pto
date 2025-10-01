@@ -1,6 +1,7 @@
 import { createUser } from "../services/userService.js";
 import bcrypt, { hash } from "bcryptjs";
 import { findUserByCedula, hashRespuesta } from "../services/userService.js";
+import jwt from "jsonwebtoken";
 
 export const registerUser = async (req, res) => {
   try {
@@ -74,7 +75,16 @@ export const getIdUser = async (req, res) => {
     
     return res.status(500).json({ 
       success: false,
-      error: "Error validando credenciales" 
+      error: "Error validando cédula"
     });
+  }
+}
+
+export const getToken = async (req, res) => {
+  try{
+    
+  }catch(error){
+    console.log("|------Controlador de Usuarios------|");
+    console.error("Error generando token:", error);
   }
 }

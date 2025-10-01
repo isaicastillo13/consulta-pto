@@ -3,7 +3,7 @@ import headerImage from "../assets/Header.png";
 import InputField from "../components/InputField";
 import SelectField from "../components/SelectField";
 import NavLink from "../components/NavLink";
-import Buttom from "../components/Buttom";
+import Button from "../components/Button";
 import { userService } from "../services/api";  // ← Cambia esta importación
 import { useNavigate } from "react-router-dom";
 
@@ -143,7 +143,7 @@ export default function Register() {
             required={true}
           />
 
-          <Buttom
+          <Button
             id="registerButton"
             children={loading ? "Registrando..." : "Registrarse"}
             className="mt-4 w-100"

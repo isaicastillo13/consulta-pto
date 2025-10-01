@@ -2,10 +2,12 @@ import React, { use, useEffect, useState } from "react";
 import InputField from "../components/InputField";
 import sideImage from "../assets/banner.png";
 import formLogo from "../assets/form_logo.png";
-import Buttom from "../components/Buttom";
+import Button from "../components/Button";
 import NavLink from "../components/NavLink";
 import imgFooter from "../assets/Footer.png";
 import { userService } from "../services/api"; // ← Asegúrate de que esta importación es correcta
+import { useNavigate } from "react-router-dom";
+
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -13,55 +15,90 @@ export default function Login() {
     respuesta: "",
   });
 
-  const [visible, setVisible] = useState(false);
-  const [idValidated, setIdValidated] = useState(false);
-  const [validateMessage, setValidateMessage] = useState("");
-  const [textButtom, setTextButtom] = useState("Consultar");
+  const [showAnswerField , setshowAnswerField ] = useState(false);
+  const [isIdValidated , setisIdValidated ] = useState(false);
+  const [validationMessage , setvalidationMessage ] = useState("");
+  const [textButton, setTextButton] = useState("Consultar");
+  const [isSuccess, setIsSuccess] = useState(null);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (validateMessage) {
+    if (validationMessage ) {
       const timer = setTimeout(() => {
-        setValidateMessage("");
+        setvalidationMessage ("");
+        if (isSuccess === false && isIdValidated  === false) {
+          setIsSuccess(null);
+          setisIdValidated (null);
+          addClassToInput();
+          addClassToLabel();
+        }
+        
       }, 2000);
       return () => clearTimeout(timer);
     }
-  }, [validateMessage]);
+  }, [validationMessage ]);
 
   const addClassToInput = () => {
-    if(validateMessage == "" && idValidated == true){
+    if (
+      isSuccess === true &&
+      isIdValidated  === true
+    ) {
       return "border border-2 border-success-subtle bg-success-subtle focus-none text-success";
-    }else if(validateMessage != "" && idValidated == false){
+    } else if (
+      isSuccess === true &&
+      isIdValidated  === true
+    ) {
+      return "border border-2 border-success-subtle bg-success-subtle focus-none text-success";
+    } else if (
+      isSuccess === false &&
+      isIdValidated  === false
+    ) {
       return "border border-2 border-danger-subtle bg-danger-subtle focus-none text-danger";
-    }else{
+    } else {
       return "";
     }
-  }
+  };
   const addClassToLabel = () => {
-    if(validateMessage == "" && idValidated == true){
+    if (isSuccess === true &&
+      isIdValidated  === true) {
       return "text-success";
-    }else if(validateMessage != "" && idValidated == false){
+    } else if (isSuccess === true &&
+      isIdValidated  === true) {
+      return "text-success";
+    } else if (isSuccess === false &&
+      isIdValidated  === false) {
       return "text-danger";
-    }else{
+    } else {
       return "";
     }
-  }
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setTextButtom("Consultando...");
+    setTextButton("Consultando...");
     // Aquí puedes agregar la lógica para manejar el envío del formulario
     try {
       const response = await userService.validateId(formData);
-      console.log("Usuario autenticado:", response);
-      setVisible(true);
-      setIdValidated(true);
 
+      setshowAnswerField (true);
+      setisIdValidated (true);
+      setvalidationMessage (response.message);
+      setIsSuccess(true);
+    
+
+      if (isSuccess === true &&
+      isIdValidated  === true) {
+        const response = await userService.generateToken();
+        navigate("/Home");
+P
+      }
     } catch (error) {
-      console.error("Error consultando usuario:", error);
-      setValidateMessage(
+      setIsSuccess(false);
+      setvalidationMessage (
         "Cédula no encontrada. Por favor, verifica e intenta de nuevo."
       );
-      setTextButtom("Consultar");
+      setTextButton("Consultar");
     }
   };
 
@@ -109,12 +146,12 @@ export default function Login() {
                   onChange={(e) =>
                     setFormData({ ...formData, cedula: e.target.value })
                   }
-                  disabled={idValidated}
+                  disabled={isIdValidated }
                 />
               </div>
 
               {/* Campo Respuesta */}
-              <div className={`mb-3 ${visible ? "" : "d-none"}`}>
+              <div className={`mb-3 ${showAnswerField  ? "" : "d-none"}`}>
                 <InputField
                   id="respuesta"
                   name="respuesta"
@@ -131,31 +168,31 @@ export default function Login() {
 
               <div
                 className={`alert alert-danger ${
-                  validateMessage ? "" : "d-none"
+                  validationMessage  ? "" : "d-none"
                 }`}
                 role="alert"
               >
-                {validateMessage && (
-                  <p className="text-danger">{validateMessage}</p>
+                {validationMessage  && (
+                  <p className="text-danger">{validationMessage }</p>
                 )}
               </div>
 
               {/* Botón */}
-              <Buttom
+              <Button
                 id="consultarBtn"
-                className={`w-100 mt-3 ${visible ? "d-none" : ""}`}
+                className={`w-100 mt-3 ${showAnswerField  ? "d-none" : ""}`}
                 type="submit"
               >
-                {textButtom}
-                {/* <span className={`spinner-grow spinner-grow-sm mx-2 ${textButtom == "Consultando..." ? "d-inline-block" : "d-none"}`} aria-hidden="true"></span> */}
-              </Buttom>
-              <Buttom
+                {textButton}
+                {/* <span className={`spinner-grow spinner-grow-sm mx-2 ${textButton == "Consultando..." ? "d-inline-block" : "d-none"}`} aria-hidden="true"></span> */}
+              </Button>
+              <Button
                 id="ingresarBtn"
-                className={`w-100 mt-3 ${visible ? "" : "d-none"}`}
+                className={`w-100 mt-3 ${showAnswerField  ? "" : "d-none"}`}
                 type="submit"
               >
                 Ingresar
-              </Buttom>
+              </Button>
 
               {/* Link de registro */}
               <p className="text-center mt-4 text-secondary">

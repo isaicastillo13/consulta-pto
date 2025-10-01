@@ -1,4 +1,4 @@
-export default function Buttom({id, children, className = ""}) {
+export default function Button({id, children, className = ""}) {
     return (
         <>
             <button
