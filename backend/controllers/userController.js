@@ -61,12 +61,19 @@ export const getIdUser = async (req, res) => {
     // 3. Si VIENE respuesta, validarla
     const respuestaLogin = req.body.respuesta;
     const respuestaHash = await hashRespuesta(cedulaLogin, respuestaLogin);
-    
+
+    const token = jwt.sign(
+      { id: idUser.id, cedula: idUser.cedula },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
     return res.json({
       success: true,
       user: idUser,
       respuestaValidada: respuestaHash,
-      message: 'Usuario y respuesta validados correctamente'
+      message: 'Usuario y respuesta validados correctamente',
+      token
     });
 
   } catch (error) {
@@ -82,7 +89,7 @@ export const getIdUser = async (req, res) => {
 
 export const getToken = async (req, res) => {
   try{
-    
+
   }catch(error){
     console.log("|------Controlador de Usuarios------|");
     console.error("Error generando token:", error);

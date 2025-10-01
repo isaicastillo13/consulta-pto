@@ -89,9 +89,9 @@ export default function Login() {
 
       if (isSuccess === true &&
       isIdValidated  === true) {
-        const response = await userService.generateToken();
+       
         navigate("/Home");
-P
+
       }
     } catch (error) {
       setIsSuccess(false);
