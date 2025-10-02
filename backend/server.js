@@ -49,9 +49,9 @@ app.get("/api/debug", (req, res) => {
 });
 
 // Ruta para obtener preguntas de seguridad
-app.use("/api/security", securityRoutes);
+app.use("/api", securityRoutes);
 
-// Ruta de registro TEMPORAL (sin DB)
+// Ruta de registro
 app.use("/api/users", userRoutes);
 app.use("/api/auth", userRoutes);
 

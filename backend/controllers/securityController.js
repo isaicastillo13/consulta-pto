@@ -1,12 +1,9 @@
-// Controladores (controllers) → deben expresar qué acción están respondiendo para el cliente.
-import { findSecurityQuestions } from "../services/securityService.js";
-
+import { findAllSecurityQuestions } from "../services/securityService.js";
 
 export const getSecurityQuestions = async (req, res) => {
     try{
-        const questions = await findSecurityQuestions();
+        const questions = await findAllSecurityQuestions();
         res.json(questions);
-        console.log("Preguntas de seguridad enviadas:", questions);
         
     }catch(error){
         console.error("Error obteniendo preguntas de seguridad:", error);

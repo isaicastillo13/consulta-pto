@@ -27,7 +27,7 @@ export default function Register() {
       try {
         const response = await userService.getSecurityQuestions();
         setSecurityQuestions(response);
-        console.log("Preguntas de seguridad cargadas:", response);
+
       } catch (error) {
         console.error("Error cargando preguntas:", error);
       }

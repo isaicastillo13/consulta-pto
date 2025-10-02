@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 export const createUser = async (userData) => {
   const { data, error } = await supabase.from("usuarios").insert([userData]);
   if (error) {
-    console.log("|------Servicio de Usuarios------|");
+    console.log("|------Insertar Usuario en la BD------|");
     console.error("Error creando usuario:", error);
     throw error;
   }
@@ -31,8 +31,6 @@ export const hashRespuesta = async (cedula, respuesta) => {
   const salt = await bcrypt.genSalt(10);
   const respuestaHash = await bcrypt.hash(respuesta, salt);
 
-
-
   const { data, error } = await supabase
     .from("usuarios")
     .select("*")
@@ -42,10 +40,11 @@ export const hashRespuesta = async (cedula, respuesta) => {
 
     const isMatch = await bcrypt.compare(respuesta, data.respuesta_hash);
 
-  if (error) {
+
+  if (error || !isMatch) {
     console.log("|------Servicio de Usuarios------|");
     console.error("Error hasheando respuesta:", error);
     throw error;
   }
-  return data;
+  return isMatch;
 };

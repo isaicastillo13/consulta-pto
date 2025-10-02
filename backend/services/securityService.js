@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabaseClient.js';
 
-export const findSecurityQuestions = async () => {
+export const findAllSecurityQuestions = async () => {
   const { data, error } = await supabase
     .from('preguntas')
     .select('*');
