@@ -28,7 +28,7 @@ export const userService = {
   },
 
   // Login usuario
-  async validateId(data){
+  async validateId(data) {
     const response = await fetch(`${API_BASE_URL}/auth/validateid`, {
       method: "POST",
       headers: {
@@ -41,21 +41,9 @@ export const userService = {
       const errorData = await response.json();
       throw new Error(errorData.error || "Error al validar cédula");
     }
-    return response.json();
+
+    const dataRes = await response.json();
+    localStorage.setItem("token", dataRes.token); // Guardar el token en localStorage
+    return dataRes;
   },
-
-  // async generateToken(userData){
-  //   const response = await fetch (`${API_BASE_URL}/auth/generate-token`),{
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //     },
-  //   });
-
-  //   if (!response.ok) {
-  //     const errorData = await response.json();
-  //     throw new Error(errorData.error || "Error al generar token");
-  //   }
-  //   return response.json();
-  // }
 };

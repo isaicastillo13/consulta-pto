@@ -80,18 +80,18 @@ export default function Login() {
     // Aquí puedes agregar la lógica para manejar el envío del formulario
     try {
       const response = await userService.validateId(formData);
+      const token = response.token;
+      console.log("Respuesta del servidor:", response);
 
       setshowAnswerField (true);
       setisIdValidated (true);
       setvalidationMessage (response.message);
       setIsSuccess(true);
     
-
-      if (isSuccess === true &&
-      isIdValidated  === true) {
-       
+      if(token){
         navigate("/Home");
-
+      }else{
+        
       }
     } catch (error) {
       setIsSuccess(false);

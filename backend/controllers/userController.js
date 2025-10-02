@@ -2,6 +2,8 @@ import { createUser } from "../services/userService.js";
 import bcrypt, { hash } from "bcryptjs";
 import { findUserByCedula, hashRespuesta } from "../services/userService.js";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
 export const registerUser = async (req, res) => {
   try {
@@ -67,6 +69,8 @@ export const getIdUser = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '1h' }
     );
+
+    console.log("Token generado:", token);
 
     return res.json({
       success: true,
