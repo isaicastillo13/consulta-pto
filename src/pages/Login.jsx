@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import InputField from "../components/InputField";
 import sideImage from "../assets/banner.png";
 import formLogo from "../assets/form_logo.png";
@@ -8,10 +8,12 @@ import imgFooter from "../assets/Footer.png";
 import { userService } from "../services/api";
 import { useNavigate } from "react-router-dom";
 
-// Constantes para mejorar mantenibilidad
+// Constantes
 const VALIDATION_MESSAGES = {
   ID_NOT_FOUND: "Cédula no encontrada. Por favor, verifica e intenta de nuevo.",
-  DEFAULT_ERROR: "Ha ocurrido un error. Por favor, intenta de nuevo."
+  DEFAULT_ERROR: "Ha ocurrido un error. Por favor, intenta de nuevo.",
+  INVALID_ANSWER: "Respuesta incorrecta. Por favor, intenta de nuevo.",
+  EMPTY_FIELD: "Por favor, completa todos los campos requeridos."
 };
 
 const FORM_STATES = {
@@ -22,6 +24,8 @@ const FORM_STATES = {
   ERROR: "error"
 };
 
+const MESSAGE_TIMEOUT = 3000;
+
 export default function Login() {
   const [formData, setFormData] = useState({
     cedula: "",
@@ -31,41 +35,39 @@ export default function Login() {
   const [formState, setFormState] = useState(FORM_STATES.INITIAL);
   const [validationMessage, setValidationMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
   const navigate = useNavigate();
 
-  // Efecto para limpiar mensajes después de un tiempo
+  // Limpiar mensajes con cleanup apropiado
   useEffect(() => {
     if (validationMessage) {
       const timer = setTimeout(() => {
         setValidationMessage("");
         if (formState === FORM_STATES.ERROR) {
-          resetFormState();
+          setFormState(FORM_STATES.INITIAL);
+          setIsSubmitting(false);
         }
-      }, 2000);
+      }, MESSAGE_TIMEOUT);
+      
       return () => clearTimeout(timer);
     }
   }, [validationMessage, formState]);
 
-  // Resetear estado del formulario
-  const resetFormState = () => {
-    setFormState(FORM_STATES.INITIAL);
-    setIsSubmitting(false);
-  };
-
-  // Determinar clases CSS basado en el estado
-  const getInputClasses = () => {
+  // Memoizar clases CSS
+  const inputClasses = useMemo(() => {
+    const baseClasses = "form-control rounded-pill";
     switch (formState) {
       case FORM_STATES.ID_VALIDATED:
-        return "border border-2 border-success-subtle bg-success-subtle focus-none text-success";
+        return `${baseClasses} border border-2 border-success-subtle bg-success-subtle focus-none text-success`;
       case FORM_STATES.ERROR:
-        return "border border-2 border-danger-subtle bg-danger-subtle focus-none text-danger";
+        return `${baseClasses} border border-2 border-danger-subtle bg-danger-subtle focus-none text-danger`;
       default:
-        return "";
+        return baseClasses;
     }
-  };
+  }, [formState]);
 
-  const getLabelClasses = () => {
+  const labelClasses = useMemo(() => {
     switch (formState) {
       case FORM_STATES.ID_VALIDATED:
         return "text-success";
@@ -74,49 +76,115 @@ export default function Login() {
       default:
         return "";
     }
-  };
+  }, [formState]);
 
-  // Validar cédula
-  const validateCedula = async () => {
+  // Validar formato de cédula
+  const isValidCedulaFormat = useCallback((cedula) => {
+    // Ajusta esta regex según el formato de cédula de tu país
+    return cedula.trim().length >= 6 && /^[0-9-]+$/.test(cedula);
+  }, []);
+
+  // Handlers memoizados
+  const handleCedulaChange = useCallback((e) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, cedula: value }));
+    // Limpiar errores al escribir
+    if (formState === FORM_STATES.ERROR) {
+      setFormState(FORM_STATES.INITIAL);
+      setValidationMessage("");
+    }
+  }, [formState]);
+
+  const handleRespuestaChange = useCallback((e) => {
+    const value = e.target.value;
+    setFormData(prev => ({ ...prev, respuesta: value }));
+    if (formState === FORM_STATES.ERROR) {
+      setValidationMessage("");
+    }
+  }, [formState]);
+
+  // Validar cédula con mejor manejo de errores
+  const validateCedula = useCallback(async () => {
+    if (!isValidCedulaFormat(formData.cedula)) {
+      setFormState(FORM_STATES.ERROR);
+      setValidationMessage("Formato de cédula inválido");
+      return false;
+    }
+
+    setFormState(FORM_STATES.VALIDATING_ID);
+    
     try {
       const response = await userService.validateUserByCedula(formData);
       setFormState(FORM_STATES.ID_VALIDATED);
-      setValidationMessage(response.message);
+      setValidationMessage(response.message || "Cédula válida. Ingresa tu respuesta.");
+      setError(null);
       return true;
     } catch (error) {
       console.error("Error validando cédula:", error);
       setFormState(FORM_STATES.ERROR);
-      setValidationMessage(VALIDATION_MESSAGES.ID_NOT_FOUND);
+      setError(error);
+      
+      // Manejo de diferentes tipos de error
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          VALIDATION_MESSAGES.ID_NOT_FOUND;
+      setValidationMessage(errorMessage);
       return false;
     }
-  };
+  }, [formData, isValidCedulaFormat]);
 
-  // Validar respuesta de seguridad
-  const validateSecurityAnswer = async () => {
+  // Validar respuesta con mejor manejo de errores
+  const validateSecurityAnswer = useCallback(async () => {
+    setFormState(FORM_STATES.VALIDATING_ANSWER);
+    
     try {
       const response = await userService.validateSecurityAnswer(formData);
+      
       if (response.token) {
-        navigate("/Home");
+        // Guardar token si es necesario
+        // localStorage.setItem('authToken', response.token);
+        navigate("/Home", { replace: true });
         return true;
       }
+      
       throw new Error("Token no recibido");
     } catch (error) {
       console.error("Error validando respuesta:", error);
       setFormState(FORM_STATES.ERROR);
-      setValidationMessage(VALIDATION_MESSAGES.DEFAULT_ERROR);
+      setError(error);
+      
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          VALIDATION_MESSAGES.INVALID_ANSWER;
+      setValidationMessage(errorMessage);
       return false;
     }
-  };
+  }, [formData, navigate]);
 
   // Manejar envío del formulario
-  const handleSubmit = async (event) => {
+  const handleSubmit = useCallback(async (event) => {
     event.preventDefault();
+    
+    // Prevenir múltiples envíos
+    if (isSubmitting) return;
+    
     setIsSubmitting(true);
+    setValidationMessage("");
 
     try {
       if (formState === FORM_STATES.INITIAL) {
+        if (!formData.cedula.trim()) {
+          setValidationMessage(VALIDATION_MESSAGES.EMPTY_FIELD);
+          setFormState(FORM_STATES.ERROR);
+          return;
+        }
         await validateCedula();
       } else if (formState === FORM_STATES.ID_VALIDATED) {
+        if (!formData.respuesta.trim()) {
+          setValidationMessage(VALIDATION_MESSAGES.EMPTY_FIELD);
+          setFormState(FORM_STATES.ERROR);
+          return;
+        }
         await validateSecurityAnswer();
       }
     } catch (error) {
@@ -126,14 +194,18 @@ export default function Login() {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [formState, formData, isSubmitting, validateCedula, validateSecurityAnswer]);
 
-  // Computed values para mejorar legibilidad
+  // Computed values
   const showAnswerField = formState === FORM_STATES.ID_VALIDATED;
   const isIdValidated = formState === FORM_STATES.ID_VALIDATED;
   const showConsultButton = formState === FORM_STATES.INITIAL;
   const showIngresarButton = formState === FORM_STATES.ID_VALIDATED;
-  const buttonText = isSubmitting ? "Consultando..." : "Consultar";
+  const isConsultButtonDisabled = isSubmitting || !formData.cedula.trim();
+  const isIngresarButtonDisabled = isSubmitting || !formData.respuesta.trim();
+
+  const consultButtonText = isSubmitting ? "Consultando..." : "Consultar";
+  const ingresarButtonText = isSubmitting ? "Validando..." : "Ingresar";
 
   return (
     <div className="container-fluid min-vh-100 d-flex flex-column">
@@ -142,8 +214,9 @@ export default function Login() {
         <div className="col-md-6 d-none d-md-flex align-items-center p-0">
           <img
             src={sideImage}
-            alt="Imagen lateral"
+            alt="Imagen lateral del formulario"
             className="img-fluid h-100 object-fit-cover"
+            loading="lazy"
           />
         </div>
 
@@ -154,19 +227,21 @@ export default function Login() {
             style={{ maxWidth: "400px" }}
             onSubmit={handleSubmit}
             noValidate
+            aria-label="Formulario de inicio de sesión"
           >
             <div className="text-center mb-4">
               <img 
                 src={formLogo} 
-                alt="Logo" 
+                alt="Logo de la empresa" 
                 className="img-fluid mb-3" 
                 style={{ maxHeight: "80px" }}
+                loading="lazy"
               />
-              <h3 className="fw-bold" style={{ color: "#3559a1" }}>
+              <h1 className="h3 fw-bold" style={{ color: "#3559a1" }}>
                 Consulta tus Puntos
-              </h3>
+              </h1>
               <p className="text-muted">
-                Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                Ingresa tu cédula para consultar tu saldo de puntos
               </p>
             </div>
 
@@ -177,18 +252,15 @@ export default function Login() {
                 name="cedula"
                 label="Cédula"
                 type="text"
-                className={`form-control rounded-pill ${getInputClasses()}`}
-                classNameLabel={getLabelClasses()}
-                placeholder="Ingrese su cédula"
+                className={inputClasses}
+                classNameLabel={labelClasses}
+                placeholder="Ej: 8-123-4567"
                 value={formData.cedula}
-                onChange={(e) =>
-                  setFormData(prev => ({ 
-                    ...prev, 
-                    cedula: e.target.value 
-                  }))
-                }
+                onChange={handleCedulaChange}
                 disabled={isIdValidated || isSubmitting}
                 required
+                autoComplete="username"
+                aria-describedby={validationMessage ? "validation-message" : undefined}
               />
             </div>
 
@@ -198,19 +270,17 @@ export default function Login() {
                 <InputField
                   id="respuesta"
                   name="respuesta"
-                  label="Respuesta"
+                  label="Respuesta de Seguridad"
                   type="text"
                   className="form-control rounded-pill"
                   placeholder="Ingrese su respuesta"
                   value={formData.respuesta}
-                  onChange={(e) =>
-                    setFormData(prev => ({ 
-                      ...prev, 
-                      respuesta: e.target.value 
-                    }))
-                  }
+                  onChange={handleRespuestaChange}
                   disabled={isSubmitting}
                   required
+                  autoComplete="off"
+                  autoFocus
+                  aria-describedby={validationMessage ? "validation-message" : undefined}
                 />
               </div>
             )}
@@ -218,10 +288,12 @@ export default function Login() {
             {/* Mensaje de validación */}
             {validationMessage && (
               <div 
-                className={`alert ${
-                  formState === FORM_STATES.ERROR ? "alert-danger" : "alert-info"
+                id="validation-message"
+                className={`alert rounded-pill ${
+                  formState === FORM_STATES.ERROR ? "alert-danger" : "alert-success"
                 } mb-3`}
                 role="alert"
+                aria-live="polite"
               >
                 {validationMessage}
               </div>
@@ -233,9 +305,10 @@ export default function Login() {
                 id="consultarBtn"
                 className="w-100 mt-3"
                 type="submit"
-                disabled={isSubmitting || !formData.cedula.trim()}
+                disabled={isConsultButtonDisabled}
+                aria-busy={isSubmitting}
               >
-                {buttonText}
+                {consultButtonText}
               </Button>
             )}
 
@@ -244,9 +317,10 @@ export default function Login() {
                 id="ingresarBtn"
                 className="w-100 mt-3"
                 type="submit"
-                disabled={isSubmitting || !formData.respuesta.trim()}
+                disabled={isIngresarButtonDisabled}
+                aria-busy={isSubmitting}
               >
-                {isSubmitting ? "Validando..." : "Ingresar"}
+                {ingresarButtonText}
               </Button>
             )}
 
@@ -265,13 +339,14 @@ export default function Login() {
       </div>
 
       {/* Footer */}
-      <div className="w-100 mt-auto">
+      <footer className="w-100 mt-auto">
         <img 
           className="img-fluid w-100" 
           src={imgFooter} 
-          alt="Footer" 
+          alt="Pie de página" 
+          loading="lazy"
         />
-      </div>
+      </footer>
     </div>
   );
 }

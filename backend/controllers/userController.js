@@ -75,7 +75,6 @@ export const validateSecurityAnswer = async (req, res) => {
     const respuestaLogin = req.body.respuesta;
     const respuestaHash = await hashRespuesta(cedulaLogin, respuestaLogin);
 
-    console.log("Respuesta Hash desde el controlador: ", respuestaHash);
 
     const token = jwt.sign(
       { cedula: cedulaLogin, respuesta: respuestaLogin },
@@ -89,12 +88,11 @@ export const validateSecurityAnswer = async (req, res) => {
       token,
     });
   } catch (error) {
-    console.log("|------Controlador de Usuarios------|");
     console.error("Error validando respuesta:", error);
 
     return res.status(500).json({
       success: false,
-      error: "Error validando respuesta",
+      error: "Respuesta es incorrecta",
     });
   }
 };
