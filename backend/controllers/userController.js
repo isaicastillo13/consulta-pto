@@ -80,7 +80,7 @@ export const validateSecurityAnswer = async (req, res) => {
     const token = jwt.sign(
       { cedula: cedulaLogin, respuesta: respuestaLogin },
       process.env.JWT_SECRET,
-      { expiresIn: "60s" }
+      { expiresIn: "1h" }
     );
 
     return res.json({
