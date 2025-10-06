@@ -1,7 +1,9 @@
 import express from "express";
 import { registerUser } from "../controllers/userController.js";
 import { validateRequiredFields } from "../middleware/validateRequiredFields.js";
-import { validateUserByCedula, validateSecurityAnswer } from "../controllers/userController.js";
+import { verifyToken } from "../middleware/authMiddleware.js";
+import { validateUserByCedula, validateSecurityAnswer, verifyTokenStatus } from "../controllers/userController.js";
+
 
 
 const router = express.Router();
@@ -13,6 +15,7 @@ router.post(
 
 router.post("/validate-cedula",validateUserByCedula);
 router.post("/validate-security",validateSecurityAnswer);
+router.get("/verify-token", verifyToken, verifyTokenStatus);
 
 
 

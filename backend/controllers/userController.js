@@ -73,13 +73,14 @@ export const validateSecurityAnswer = async (req, res) => {
   try {
     const cedulaLogin = req.body.cedula;
     const respuestaLogin = req.body.respuesta;
-    const respuestaHash = await hashRespuesta(cedulaLogin, respuestaLogin);
+    await hashRespuesta(cedulaLogin, respuestaLogin);
+
 
 
     const token = jwt.sign(
       { cedula: cedulaLogin, respuesta: respuestaLogin },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: "60s" }
     );
 
     return res.json({
@@ -95,4 +96,12 @@ export const validateSecurityAnswer = async (req, res) => {
       error: "Respuesta es incorrecta",
     });
   }
+};
+
+export const verifyTokenStatus = (req, res) => {
+  return res.json({
+    success: true,
+    message: "Token válido",
+    user: req.user
+  });
 };

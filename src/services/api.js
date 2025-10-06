@@ -62,4 +62,31 @@ export const userService = {
     localStorage.setItem("token", dataRes.token); // Guardar el token en localStorage
     return dataRes;
   },
+
+  async verifyToken() {
+    const token = localStorage.getItem("token");
+    
+    if (!token) {
+      throw new Error("No hay token");
+    }
+
+    const response = await fetch(`${API_BASE_URL}/users/verify-token`, {
+      headers: {
+        "Authorization": `Bearer ${token}`
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      
+      if (errorData.expired) {
+        localStorage.removeItem("token");
+        throw new Error("Token expirado");
+      }
+      
+      throw new Error(errorData.error || "Token inválido");
+    }
+
+    return response.json();
+  }
 };
