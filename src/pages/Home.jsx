@@ -6,9 +6,11 @@ import stickerIcon from "../assets/svg/stickerIcon.svg";
 import totalpuntosIcon from "../assets/svg/totalpuntosicon.svg";
 import moneyIcon from "../assets/svg/moneyicon.svg";
 import creditcardIcon from "../assets/svg/creditcard.svg";
+import { useCliente } from "../context/ClienteContext";
 
 export default function Home() {
   const navigate = useNavigate();
+  const {cliente} = useCliente();
 
   useEffect(() => {
     console.log("Verificando autenticación del usuario...");
@@ -28,21 +30,10 @@ export default function Home() {
     checkAuth();
   }, [navigate]);
 
-  useEffect(() => {
-    try {
-      const fetchCliente = async () => {
-        const response = await userService.verificarCliente();
-        console.log("Respuesta del cliente:", response);
-      };
-      fetchCliente();
-    } catch (error) {
-      console.error("Error al verificar cliente:", error);
-    }
-  }, []);
-
   return (
     <div>
 
+      <div>{cliente ? `👤 ${cliente.PeticionVerificarCliente?.Nombre}` : 'No autenticado' }</div>
       <div>
         <div className="col d-flex align-items-center gap-2">
         <h2>Bienvenido, Cliente</h2>
@@ -86,6 +77,8 @@ export default function Home() {
         <p></p>
         <p></p>
         <a href=""></a>
+    </div>
+    <div>
     </div>
     </div>
   );
