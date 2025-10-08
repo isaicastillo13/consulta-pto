@@ -1,6 +1,5 @@
 const API_BASE_URL = "http://localhost:5001/api";
 
-
 export const userService = {
   // Obtener preguntas de seguridad
   async getSecurityQuestions() {
@@ -91,15 +90,15 @@ export const userService = {
     return response.json();
   },
 
-  async verificarCliente(cedula) {
-  const response = await fetch(`${API_BASE_URL}/cliente/verificar`, {
+async verificarCliente(cedula) {
+  const response = await fetch(`${API_BASE_URL}/cliente/verificarcliente`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      identificacion: cedula,      // ojo con el nombre del campo
-      fecha: new Date().toLocaleString(),
+      identificacion: cedula,
+      fecha: formatFechaSOAP(),
     }),
   });
 
@@ -109,8 +108,29 @@ export const userService = {
     throw new Error(data.error || "Error al verificar cliente");
   }
 
-  guardarCliente(data.data);  // contexto en memoria
-  return data.data;
+  return data.data; // ✅ devolvemos la data, no la guardamos aquí
 }
 
 };
+
+function formatFechaSOAP(date = new Date()) {
+  let day = date.getDate();
+  let month = date.getMonth() + 1;
+  const year = date.getFullYear();
+
+
+  day = day.toString().padStart(2, "0");
+  month = month.toString().padStart(2, "0");
+
+  let hours = date.getHours();
+  const minutes = date.getMinutes().toString().padStart(2, "0");
+  const seconds = date.getSeconds().toString().padStart(2, "0");
+
+
+  const ampm = hours >= 12 ? "pm" : "am";
+  hours = hours % 12;
+  hours = hours || 12; // el 0 se transforma en 12
+  const formattedHours = hours.toString().padStart(2, "0");
+
+  return `${month}/${day}/${year} ${formattedHours}:${minutes}:${seconds} ${ampm}`;
+}

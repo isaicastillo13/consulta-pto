@@ -7,6 +7,8 @@ import NavLink from "../components/NavLink";
 import imgFooter from "../assets/Footer.png";
 import { userService } from "../services/api";
 import { useNavigate } from "react-router-dom";
+import { useCliente } from "../context/ClienteContext";
+
 
 // Constantes
 const VALIDATION_MESSAGES = {
@@ -36,6 +38,7 @@ export default function Login() {
   const [validationMessage, setValidationMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
+  const { guardarCliente } = useCliente();
 
   const navigate = useNavigate();
 
@@ -139,11 +142,14 @@ export default function Login() {
     
     try {
       const response = await userService.validateSecurityAnswer(formData);
+    
       
       if (response.token) {
         // Guardar token si es necesario
         // localStorage.setItem('authToken', response.token);
-        await userService.verificarCliente(formData.cedula);
+       
+        const cliente = await userService.verificarCliente(formData.cedula);
+        guardarCliente(cliente);
         navigate("/Home", { replace: true });
         return true;
       }

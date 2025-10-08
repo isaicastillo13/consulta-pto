@@ -75,8 +75,6 @@ export const validateSecurityAnswer = async (req, res) => {
     const respuestaLogin = req.body.respuesta;
     await hashRespuesta(cedulaLogin, respuestaLogin);
 
-
-
     const token = jwt.sign(
       { cedula: cedulaLogin, respuesta: respuestaLogin },
       process.env.JWT_SECRET,
