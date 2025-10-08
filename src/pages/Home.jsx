@@ -28,6 +28,18 @@ export default function Home() {
     checkAuth();
   }, [navigate]);
 
+  useEffect(() => {
+    try {
+      const fetchCliente = async () => {
+        const response = await userService.verificarCliente();
+        console.log("Respuesta del cliente:", response);
+      };
+      fetchCliente();
+    } catch (error) {
+      console.error("Error al verificar cliente:", error);
+    }
+  }, []);
+
   return (
     <div>
 

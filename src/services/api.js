@@ -1,5 +1,6 @@
 const API_BASE_URL = "http://localhost:5001/api";
 
+
 export const userService = {
   // Obtener preguntas de seguridad
   async getSecurityQuestions() {
@@ -88,5 +89,28 @@ export const userService = {
     }
 
     return response.json();
+  },
+
+  async verificarCliente(cedula) {
+  const response = await fetch(`${API_BASE_URL}/cliente/verificar`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      identificacion: cedula,      // ojo con el nombre del campo
+      fecha: new Date().toLocaleString(),
+    }),
+  });
+
+  const data = await response.json();
+
+  if (!response.ok || !data.ok) {
+    throw new Error(data.error || "Error al verificar cliente");
   }
+
+  guardarCliente(data.data);  // contexto en memoria
+  return data.data;
+}
+
 };

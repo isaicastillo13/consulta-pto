@@ -143,6 +143,7 @@ export default function Login() {
       if (response.token) {
         // Guardar token si es necesario
         // localStorage.setItem('authToken', response.token);
+        await userService.verificarCliente(formData.cedula);
         navigate("/Home", { replace: true });
         return true;
       }
