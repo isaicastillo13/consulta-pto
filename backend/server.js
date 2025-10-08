@@ -54,6 +54,7 @@ app.use("/api", securityRoutes);
 // Ruta de registro
 app.use("/api/users", userRoutes);
 app.use("/api/auth", userRoutes);
+app.use("/api/cliente", userRoutes);
 
 
 app.listen(PORT, () => {
