@@ -7,7 +7,7 @@ import { fileURLToPath } from "url";
 import { Route } from "react-router-dom";
 import securityRoutes from "./routes/securityRoute.js";
 import userRoutes from "./routes/userRoute.js";
-import userRoutesclient from "./routes/cliente.routes.js";
+import clienteRoutes from "./routes/cliente.routes.js";
 
 // Configurar __dirname para ES modules
 const __filename = fileURLToPath(import.meta.url);
@@ -55,7 +55,8 @@ app.use("/api", securityRoutes);
 // Ruta de registro
 app.use("/api/users", userRoutes);
 app.use("/api/auth", userRoutes);
-app.use("/api/cliente", userRoutesclient);
+app.use("/api/cliente", clienteRoutes);
+
 
 
 app.listen(PORT, () => {

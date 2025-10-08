@@ -33,15 +33,41 @@ function buildVerificarClienteXML({ identificacion, fecha }) {
   </soap:Envelope>`;
 }
 
+function buildConsultarClienteXML({ numeroCliente, numeroCuenta, fecha }) {
+  console.log("Construyendo XML para ConsultarCliente con:", { numeroCliente, numeroCuenta, fecha });
+  return `<?xml version="1.0" encoding="utf-8"?>
+  <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:wsp="http://wsposite.smrey.net/">
+    <soap:Header/>
+    <soap:Body>
+      <wsp:ConsultarCliente>
+        <wsp:Peticion>
+          <PeticionConsultarCliente xmlns="http://wsposite.smrey.net/">
+            <Flag>01</Flag>
+            <Credencial>
+              <Usuario>${process.env.USUARIO_SOAP}</Usuario>
+              <Clave>${process.env.CLAVE_SOAP}</Clave>
+              <Dominio>${process.env.DOMINIO_SOAP}</Dominio>
+            </Credencial>
+            <TipoTerminal>5</TipoTerminal>
+            <Fecha>${fecha}</Fecha>
+            <NumeroCliente>${numeroCliente}</NumeroCliente>
+            <NumeroCuenta>${numeroCuenta}</NumeroCuenta>
+          </PeticionConsultarCliente>
+        </wsp:Peticion>
+      </wsp:ConsultarCliente>
+    </soap:Body>
+  </soap:Envelope>`;
+}
+
 /**
  * Envía la petición SOAP y devuelve el objeto parseado
  */
 export async function verificarClienteService(data) {
-  // 1️⃣ Construir XML
+  //Construir XML
   const xml = buildVerificarClienteXML(data);
-  console.log("XML enviado:\n", xml);
 
-  // 2️⃣ Hacer fetch al servicio SOAP
+
+  //Hacer fetch al servicio SOAP
   const response = await fetch(process.env.SOAP_ENDPOINT, {
     method: "POST",
     headers: {
@@ -52,14 +78,12 @@ export async function verificarClienteService(data) {
   });
 
   const responseText = await response.text();
-  console.log("📥 Respuesta SOAP cruda:\n", responseText);
-
+  
   //Parsear la respuesta XML a objeto JS
   const parsed = await parseStringPromise(responseText);
 
   //Opcional: limpiar y devolver solo los datos útiles
   const result = parsed["soap:Envelope"]["soap:Body"][0]["VerificarClienteResponse"][0]["VerificarClienteResult"][0]["RespuestaVerificarCliente"][0];
-
   return {
     codigoRespuesta: result.CodigoRespuesta?.[0] || null,
     mensaje: result.Mensaje?.[0] || null,
@@ -67,4 +91,31 @@ export async function verificarClienteService(data) {
     numeroCuenta: result.NumeroCuenta?.[0] || null,
     raw: result, // por si quieres ver todo
   };
+}
+
+export async function consultarClienteService(data) {
+  const xml = buildConsultarClienteXML(data);
+
+  console.log("XML ConsultarCliente:\n", xml);
+
+  const response = await fetch(process.env.SOAP_ENDPOINT, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/soap+xml; charset=utf-8",
+      "SOAPAction": "\"http://wsposite.smrey.net/ConsultarCliente\"",
+    },
+    body: xml,
+  });
+
+  const responseText = await response.text();
+  console.log("Respuesta SOAP ConsultarCliente cruda:\n", responseText);
+
+  const parsed = await parseStringPromise(responseText);
+
+  // Extraemos la parte útil de la respuesta
+  const result =
+    parsed["soap:Envelope"]["soap:Body"][0]["ConsultarClienteResponse"][0]["ConsultarClienteResult"][0];
+
+  // Puedes mapear campos específicos aquí según lo que devuelva el WSDL real
+  return result;
 }

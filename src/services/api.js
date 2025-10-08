@@ -43,7 +43,7 @@ export const userService = {
     }
     return response.json();
   },
-  
+
   async validateSecurityAnswer(data) {
     const response = await fetch(`${API_BASE_URL}/auth/validate-security`, {
       method: "POST",
@@ -65,52 +65,73 @@ export const userService = {
 
   async verifyToken() {
     const token = localStorage.getItem("token");
-    
+
     if (!token) {
       throw new Error("No hay token");
     }
 
     const response = await fetch(`${API_BASE_URL}/users/verify-token`, {
       headers: {
-        "Authorization": `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     if (!response.ok) {
       const errorData = await response.json();
-      
+
       if (errorData.expired) {
         localStorage.removeItem("token");
         throw new Error("Token expirado");
       }
-      
+
       throw new Error(errorData.error || "Token inválido");
     }
 
     return response.json();
   },
 
-async verificarCliente(cedula) {
-  const response = await fetch(`${API_BASE_URL}/cliente/verificarcliente`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      identificacion: cedula,
-      fecha: formatFechaSOAP(),
-    }),
-  });
+  async verificarCliente(cedula) {
+    const response = await fetch(`${API_BASE_URL}/cliente/verificarcliente`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        identificacion: cedula,
+        fecha: formatFechaSOAP(),
+      }),
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  if (!response.ok || !data.ok) {
-    throw new Error(data.error || "Error al verificar cliente");
-  }
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || "Error al verificar cliente");
+    }
 
-  return data.data; // ✅ devolvemos la data, no la guardamos aquí
-}
+    return data.data; // ✅ devolvemos la data, no la guardamos aquí
+  },
 
+  async consultarCliente({ numeroCliente, numeroCuenta }) {
+    const response = await fetch(`${API_BASE_URL}/cliente/consultarcliente`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        numeroCliente,
+        numeroCuenta,
+        fecha: formatFechaSOAP(),
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || !data.ok) {
+      throw new Error(data.error || "Error al consultar cliente");
+    }
+
+    return data.data;
+  },
 };
 
 function formatFechaSOAP(date = new Date()) {
@@ -118,14 +139,12 @@ function formatFechaSOAP(date = new Date()) {
   let month = date.getMonth() + 1;
   const year = date.getFullYear();
 
-
   day = day.toString().padStart(2, "0");
   month = month.toString().padStart(2, "0");
 
   let hours = date.getHours();
   const minutes = date.getMinutes().toString().padStart(2, "0");
   const seconds = date.getSeconds().toString().padStart(2, "0");
-
 
   const ampm = hours >= 12 ? "pm" : "am";
   hours = hours % 12;

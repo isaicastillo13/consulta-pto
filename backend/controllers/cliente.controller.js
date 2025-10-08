@@ -1,4 +1,4 @@
-import { verificarClienteService } from "../services/cliente.service.js";
+import { verificarClienteService, consultarClienteService } from "../services/cliente.service.js";
 
 export async function verificarClienteController(req, res) {
   try {
@@ -25,6 +25,33 @@ export async function verificarClienteController(req, res) {
     res.status(500).json({
       ok: false,
       error: error.message || "Error interno en el servidor",
+    });
+  }
+}
+
+export async function consultarClienteController(req, res) {
+  try {
+    const { numeroCliente, numeroCuenta, fecha } = req.body;
+
+    if (!numeroCliente || !numeroCuenta) {
+      return res.status(400).json({
+        ok: false,
+        error: "Faltan parámetros: numeroCliente y numeroCuenta son requeridos",
+      });
+    }
+
+    const result = await consultarClienteService({ numeroCliente, numeroCuenta, fecha });
+
+    return res.json({
+      ok: true,
+      data: result,
+    });
+
+  } catch (error) {
+    console.error("Error en consultarClienteController:", error);
+    res.status(500).json({
+      ok: false,
+      error: error.message || "Error al consultar cliente",
     });
   }
 }

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { use, useEffect } from "react";
 import { userService } from "../services/api";
 import { useNavigate } from "react-router-dom";
 import hiIcon from "../assets/hiIconpng.png";
@@ -8,9 +8,12 @@ import moneyIcon from "../assets/svg/moneyicon.svg";
 import creditcardIcon from "../assets/svg/creditcard.svg";
 import { useCliente } from "../context/ClienteContext";
 
+
+
 export default function Home() {
   const navigate = useNavigate();
   const {cliente} = useCliente();
+
 
   useEffect(() => {
     console.log("Verificando autenticación del usuario...");
@@ -30,10 +33,28 @@ export default function Home() {
     checkAuth();
   }, [navigate]);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!cliente) {
+        console.warn("No se encontró información del cliente, redirigiendo a Login.");
+        navigate("/", { replace: true });
+      } else {
+        const datosCliente = await userService.consultarCliente({
+          numeroCliente: cliente.numeroCliente,
+          numeroCuenta: cliente.numeroCuenta,
+        });
+        console.log("Datos del cliente obtenidos:", datosCliente);
+      }
+    };
+
+    fetchData();
+  }, [cliente]);
+
   return (
+
     <div>
 
-      <div>{cliente ? `👤 ${cliente.PeticionVerificarCliente?.Nombre}` : 'No autenticado' }</div>
+
       <div>
         <div className="col d-flex align-items-center gap-2">
         <h2>Bienvenido, Cliente</h2>

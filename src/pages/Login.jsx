@@ -142,14 +142,14 @@ export default function Login() {
     
     try {
       const response = await userService.validateSecurityAnswer(formData);
-    
-      
       if (response.token) {
+     
         // Guardar token si es necesario
         // localStorage.setItem('authToken', response.token);
        
         const cliente = await userService.verificarCliente(formData.cedula);
         guardarCliente(cliente);
+        localStorage.setItem("cliente", JSON.stringify(cliente));
         navigate("/Home", { replace: true });
         return true;
       }
