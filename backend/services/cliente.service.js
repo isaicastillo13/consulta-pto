@@ -96,8 +96,6 @@ export async function verificarClienteService(data) {
 export async function consultarClienteService(data) {
   const xml = buildConsultarClienteXML(data);
 
-  console.log("XML ConsultarCliente:\n", xml);
-
   const response = await fetch(process.env.SOAP_ENDPOINT, {
     method: "POST",
     headers: {
@@ -108,8 +106,6 @@ export async function consultarClienteService(data) {
   });
 
   const responseText = await response.text();
-  console.log("Respuesta SOAP ConsultarCliente cruda:\n", responseText);
-
   const parsed = await parseStringPromise(responseText);
 
   // Extraemos la parte útil de la respuesta

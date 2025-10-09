@@ -1,106 +1,135 @@
-import React, { use, useEffect } from "react";
-import { userService } from "../services/api";
+import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { userService } from "../services/api";
+import { useCliente } from "../context/ClienteContext";
+
+// Íconos
 import hiIcon from "../assets/hiIconpng.png";
 import stickerIcon from "../assets/svg/stickerIcon.svg";
 import totalpuntosIcon from "../assets/svg/totalpuntosicon.svg";
 import moneyIcon from "../assets/svg/moneyicon.svg";
 import creditcardIcon from "../assets/svg/creditcard.svg";
-import { useCliente } from "../context/ClienteContext";
-
-
 
 export default function Home() {
   const navigate = useNavigate();
-  const {cliente} = useCliente();
+  const { cliente } = useCliente();
 
+  const [datosCliente, setDatosCliente] = useState(null);
+  const [totalPuntos, setTotalPuntos] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
+  // ✅ Verificar token al montar
   useEffect(() => {
-    console.log("Verificando autenticación del usuario...");
-    
     const checkAuth = async () => {
       try {
         await userService.verifyToken();
-        // Token válido, el usuario puede permanecer en Home
       } catch (error) {
-        // Token inválido o expirado, redirigir a Login
         console.error("Token inválido:", error.message);
         localStorage.removeItem("token");
-        navigate("/", { replace: true }); // Redirigir al login
+        navigate("/", { replace: true });
       }
     };
-    
+
     checkAuth();
   }, [navigate]);
 
+  // ✅ Cargar datos del cliente
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchCliente = async () => {
       if (!cliente) {
         console.warn("No se encontró información del cliente, redirigiendo a Login.");
         navigate("/", { replace: true });
-      } else {
-        const datosCliente = await userService.consultarCliente({
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const response = await userService.consultarCliente({
           numeroCliente: cliente.numeroCliente,
           numeroCuenta: cliente.numeroCuenta,
         });
-        console.log("Datos del cliente obtenidos:", datosCliente);
+
+        const puntos = response?.RespuestaConsultarCliente?.[0]?.PuntosCliente?.[0] || 0;
+
+        setDatosCliente(response);
+        setTotalPuntos(puntos);
+        setError(null);
+      } catch (err) {
+        console.error("Error obteniendo datos del cliente:", err);
+        setError("No se pudieron cargar los datos del cliente.");
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchData();
-  }, [cliente]);
+    fetchCliente();
+  }, [cliente, navigate]);
 
+  // ✅ Definir tarjetas de forma declarativa
+  const tarjetas = [
+    {
+      titulo: "Total de Puntos",
+      valor: totalPuntos,
+      icono: totalpuntosIcon,
+      bg: "bg-primary-subtle text-primary",
+    },
+    {
+      titulo: "Saldo disponible",
+      valor: datosCliente?.Saldo ?? "0.00",
+      icono: moneyIcon,
+      bg: "bg-success-subtle text-success",
+    },
+    {
+      titulo: "Stickers digitales",
+      valor: datosCliente?.Stickers ?? "0",
+      icono: stickerIcon,
+      bg: "bg-danger-subtle text-danger",
+    },
+    {
+      titulo: "Tarjeta",
+      valor: datosCliente?.NumeroTarjeta ?? "—",
+      icono: creditcardIcon,
+      bg: "bg-dark-subtle text-dark",
+    },
+  ];
+
+  // 🧭 Render principal
   return (
-
-    <div>
-
-
-      <div>
-        <div className="col d-flex align-items-center gap-2">
-        <h2>Bienvenido, Cliente</h2>
-        <img className="" style={{ width: "32px", height: "auto" }} src={hiIcon} alt="" />
+    <div className="container py-4">
+      {/* HEADER */}
+      <div className="mb-4">
+        <div className="d-flex align-items-center gap-2">
+          <h2 className="mb-0">Bienvenido, {cliente?.nombre || "Cliente"}</h2>
+          <img
+            src={hiIcon}
+            alt="Saludo"
+            style={{ width: "32px", height: "auto" }}
+          />
         </div>
-        <p className="text-secondary">Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+        <p className="text-secondary mb-0">
+          Consulta y administra tus beneficios de manera rápida.
+        </p>
       </div>
 
-      <div className="row gap-2">
-        <div className="col bg-primary-subtle text-primary">
-            <div className="d-flex justify-content-between align-items-center">
-                <h4>Total de Puntos</h4>
-                <img src={totalpuntosIcon} alt="" />
-            </div>
-            <h3 className="fw-bold">2000</h3>
-        </div>
-        <div className="col bg-success-subtle">
-            <div>
-                <h4></h4>
-                <img src={moneyIcon} alt="" />
-            </div>
-            <h3></h3>
-        </div>
-        <div className="col bg-danger-subtle">
-            <div>
-                <h4></h4>
-                <img src={stickerIcon} alt="" />
-            </div>
-            <h3></h3>
-        </div>
-        <div className="col bg-dark-subtle">
-            <div>
-                <h4></h4>
-                <img src={creditcardIcon} alt="" />
-            </div>
-            <h3></h3>
-        </div>
-      </div>
+      {/* ESTADOS */}
+      {loading && <p className="text-muted">Cargando datos...</p>}
+      {error && <p className="text-danger">{error}</p>}
 
-      <div>
-        <p></p>
-        <p></p>
-        <a href=""></a>
-    </div>
-    <div>
-    </div>
+      {/* TARJETAS */}
+      {!loading && !error && (
+        <div className="row g-3">
+          {tarjetas.map((card, index) => (
+            <div key={index} className={`col-12 col-sm-6 col-md-3 p-3 rounded ${card.bg}`}>
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <h5 className="mb-0">{card.titulo}</h5>
+                <img src={card.icono} alt={card.titulo} style={{ width: "24px" }} />
+              </div>
+              <h3 className="fw-bold">{card.valor}</h3>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
