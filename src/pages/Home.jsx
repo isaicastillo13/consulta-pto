@@ -16,6 +16,7 @@ export default function Home() {
 
   const [datosCliente, setDatosCliente] = useState(null);
   const [totalPuntos, setTotalPuntos] = useState(0);
+  const [stickers, setStickers] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -51,9 +52,11 @@ export default function Home() {
         });
 
         const puntos = response?.RespuestaConsultarCliente?.[0]?.PuntosCliente?.[0] || 0;
+        const stickers = response?.RespuestaConsultarCliente?.[0]?.StickersCliente?.[0] || 0;
 
         setDatosCliente(response);
         setTotalPuntos(puntos);
+        setStickers(stickers);
         setError(null);
       } catch (err) {
         console.error("Error obteniendo datos del cliente:", err);
@@ -82,7 +85,7 @@ export default function Home() {
     },
     {
       titulo: "Stickers digitales",
-      valor: datosCliente?.Stickers ?? "0",
+      valor: stickers,
       icono: stickerIcon,
       bg: "bg-danger-subtle text-danger",
     },
