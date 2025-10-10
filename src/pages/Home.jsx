@@ -3,8 +3,13 @@ import { useNavigate } from "react-router-dom";
 import { userService } from "../services/api";
 import { useCliente } from "../context/ClienteContext";
 import Card from "../components/Card";
-
+import CreditCard from "../components/CreditCar.jsx";
+import logoScotia from "../assets/logoScotia.png";
+import  logoRey from "../assets/logoRey.png";
+import logoChip from "../assets/logoChip.png";
+import logoVisa from "../assets/logoVisa.png";
 // Íconos
+
 import hiIcon from "../assets/hiIconpng.png";
 import puntodeoro from "../assets/puntoDeOro.png";
 
@@ -22,6 +27,8 @@ export default function Home() {
   const [numTarjeta, setNumTarjeta] = useState(0);
   const [titular, setTitular] = useState(null);
   let saldoPuntos = ((totalPuntos * 0.22) / 100).toFixed(2);
+
+
 
   // ✅ Verificar token al montar
   useEffect(() => {
@@ -56,6 +63,11 @@ export default function Home() {
           numeroCuenta: cliente.numeroCuenta,
         });
 
+        console.log("Datos del cliente:", response);
+        console.log('Cargando datos de cliente:', loading);
+
+
+
         const puntos =
           response?.RespuestaConsultarCliente?.[0]?.PuntosCliente?.[0] || 0;
         const stickers =
@@ -73,14 +85,14 @@ export default function Home() {
         setTotalPuntos(puntos);
         setStickers(stickers);
         setName(name);
-        if (esClienteScotia === "0"){
+        if (esClienteScotia === "0") {
           setClienteScotia("No es cliente Scotia");
-        }else if (esClienteScotia === "1"){
+        } else if (esClienteScotia === "1") {
           setClienteScotia("Convierte en cliente Scotia en nuestras cajas");
-        }else{
+        } else {
           setClienteScotia("Cliente Scotia");
         }
-    
+
         setNumTarjeta(numTarjeta);
         setTitular(titular);
         setError(null);
@@ -95,9 +107,20 @@ export default function Home() {
     fetchCliente();
   }, [cliente, navigate]);
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    navigate("/", { replace: true });
+  };
+
   // 🧭 Render principal
   return (
     <div className="d-flex flex-column justify-content-center align-items-center h-100 p-2">
+      <div className="container d-flex w-100 justify-content-start">
+        <button className="btn btn-danger" onClick={handleLogout}>
+          Cerrar Sesión
+          <i className="bi bi-box-arrow-left ms-2"></i>
+        </button>
+      </div>
       <div
         className="container m-4 p-4 rounded-4 row bg-primary-subtle position-relative overflow-visible d-md-overflow-hidden"
         style={{ backgroundColor: "rgba(247, 247, 247)" }}
@@ -177,15 +200,13 @@ export default function Home() {
               icon="ticket"
             />
 
-            <Card
-              className="col-12 col-sm-12 col-md"
-              classtitulo="text-danger"
-              title="SCOTIABANK"
-              content={clienteScotia}
-              totales={`************${numTarjeta}`}
-              gradientIni="#e3e1e2"
-              gradientEnd="#959492"
-              icon="credit-card"
+            <CreditCard
+              bank="Scotiabank"
+              brand="REY"
+              name={clienteScotia || "CLIENTE"}
+              logo={logoRey}
+              chipIcon={logoChip}
+              logoVisa={logoVisa}
             />
           </div>
         )}
