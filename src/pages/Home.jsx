@@ -15,7 +15,7 @@ import puntodeoro from "../assets/puntoDeOro.png";
 
 export default function Home() {
   const navigate = useNavigate();
-  const { cliente } = useCliente();
+  const { cliente, loadingCliente } = useCliente();
 
   const [datosCliente, setDatosCliente] = useState(null);
   const [totalPuntos, setTotalPuntos] = useState(0);
@@ -47,15 +47,16 @@ export default function Home() {
 
   // ✅ Cargar datos del cliente
   useEffect(() => {
-    const fetchCliente = async () => {
-      if (!cliente) {
-        console.warn(
-          "No se encontró información del cliente, redirigiendo a Login."
-        );
-        navigate("/", { replace: true });
-        return;
-      }
+   
+  if (loadingCliente) return; // ⏳ esperamos la hidratación
 
+  if (!cliente) {
+    console.warn("No se encontró información del cliente, redirigiendo a Login.");
+    navigate("/", { replace: true });
+    return;
+  }
+      
+      const fetchCliente = async () => {
       try {
         setLoading(true);
         const response = await userService.consultarCliente({
@@ -100,10 +101,11 @@ export default function Home() {
     };
 
     fetchCliente();
-  }, [cliente, navigate]);
+  }, [cliente, loadingCliente, navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("cliente");
     navigate("/", { replace: true });
   };
 

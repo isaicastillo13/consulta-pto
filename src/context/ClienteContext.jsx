@@ -9,18 +9,19 @@ export function useCliente() {
 
 export function ClienteProvider({ children }) {
   const [cliente, setCliente] = useState(null);
+  const [loadingCliente, setLoadingCliente] = useState(true); // 👈 nuevo
 
-  // ✅ Al montar el provider, leemos localStorage
   useEffect(() => {
     const clienteGuardado = localStorage.getItem("cliente");
     if (clienteGuardado) {
       setCliente(JSON.parse(clienteGuardado));
     }
+    setLoadingCliente(false); // cuando termina la hidratación
   }, []);
 
   const guardarCliente = (data) => {
     setCliente(data);
-    localStorage.setItem("cliente", JSON.stringify(data)); // sincronizar aquí también
+    localStorage.setItem("cliente", JSON.stringify(data));
   };
 
   const limpiarCliente = () => {
@@ -29,7 +30,7 @@ export function ClienteProvider({ children }) {
   };
 
   return (
-    <ClienteContext.Provider value={{ cliente, guardarCliente, limpiarCliente }}>
+    <ClienteContext.Provider value={{ cliente, guardarCliente, limpiarCliente, loadingCliente }}>
       {children}
     </ClienteContext.Provider>
   );
