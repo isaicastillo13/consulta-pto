@@ -150,8 +150,8 @@ export default function Home() {
         {!loading && !error && (
           <div className="container col-12 col-sm-12 gap-3 row">
             <Card
-              title="Total de Puntos"
-              content="Totoal de puntos Acumulados"
+              title="Puntos de Oro"
+              content="Total de puntos Acumulados"
               totales={totalPuntos}
               gradientIni="#3559a1"
               gradientEnd="#4f7dd1"
@@ -182,7 +182,7 @@ export default function Home() {
               classtitulo="text-danger"
               title="SCOTIABANK"
               content={clienteScotia}
-              totales=""
+              totales={`************${numTarjeta}`}
               gradientIni="#e3e1e2"
               gradientEnd="#959492"
               icon="credit-card"
