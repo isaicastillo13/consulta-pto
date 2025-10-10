@@ -10,6 +10,7 @@ export default function Card({
   gradientIni = "#3559a1",
   gradientEnd = "#4f7dd1",
   icon = "star",
+  classtitulo = "",
 }) {
   return (
     <motion.div
@@ -26,7 +27,7 @@ export default function Card({
       <div className="card-body d-flex flex-column justify-content-between h-100">
         {/* Título e ícono */}
         <div className="d-flex justify-content-between align-items-start mb-2">
-          <span className="fs-5 fw-semibold">{title}</span>
+          <span className={`fs-5 fw-bold ${classtitulo}`}>{title}</span>
           <div
             className="d-flex align-items-center justify-content-center rounded-circle bg-white"
             style={{
