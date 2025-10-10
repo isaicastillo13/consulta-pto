@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 export default function CreditCard({
   bank = "Scotiabank",
   brand = "REY",
-  name = "CLIENTE",
+  name = "",
   logo,
   chipIcon = "https://cdn-icons-png.flaticon.com/512/848/848043.png",
   logoVisa = "https://upload.wikimedia.org/wikipedia/commons/5/5e/Visa_Inc._logo.svg",

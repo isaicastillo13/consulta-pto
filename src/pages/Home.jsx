@@ -63,11 +63,6 @@ export default function Home() {
           numeroCuenta: cliente.numeroCuenta,
         });
 
-        console.log("Datos del cliente:", response);
-        console.log('Cargando datos de cliente:', loading);
-
-
-
         const puntos =
           response?.RespuestaConsultarCliente?.[0]?.PuntosCliente?.[0] || 0;
         const stickers =
