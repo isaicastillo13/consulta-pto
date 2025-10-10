@@ -2,6 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { userService } from "../services/api";
 import { useCliente } from "../context/ClienteContext";
+import Card from "../components/Card";
 
 // Íconos
 import hiIcon from "../assets/hiIconpng.png";
@@ -9,6 +10,7 @@ import stickerIcon from "../assets/svg/stickerIcon.svg";
 import totalpuntosIcon from "../assets/svg/totalpuntosicon.svg";
 import moneyIcon from "../assets/svg/moneyicon.svg";
 import creditcardIcon from "../assets/svg/creditcard.svg";
+import header from "../assets/header.png";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -17,8 +19,10 @@ export default function Home() {
   const [datosCliente, setDatosCliente] = useState(null);
   const [totalPuntos, setTotalPuntos] = useState(0);
   const [stickers, setStickers] = useState(0);
+  const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  let saldoPuntos = ((totalPuntos * 0.22)/100).toFixed(2);
 
   // ✅ Verificar token al montar
   useEffect(() => {
@@ -39,7 +43,9 @@ export default function Home() {
   useEffect(() => {
     const fetchCliente = async () => {
       if (!cliente) {
-        console.warn("No se encontró información del cliente, redirigiendo a Login.");
+        console.warn(
+          "No se encontró información del cliente, redirigiendo a Login."
+        );
         navigate("/", { replace: true });
         return;
       }
@@ -51,12 +57,17 @@ export default function Home() {
           numeroCuenta: cliente.numeroCuenta,
         });
 
-        const puntos = response?.RespuestaConsultarCliente?.[0]?.PuntosCliente?.[0] || 0;
-        const stickers = response?.RespuestaConsultarCliente?.[0]?.StickersCliente?.[0] || 0;
+        const puntos =
+          response?.RespuestaConsultarCliente?.[0]?.PuntosCliente?.[0] || 0;
+        const stickers =
+          response?.RespuestaConsultarCliente?.[0]?.StickersCliente?.[0] || 0;
+        const name =
+          response?.RespuestaConsultarCliente?.[0]?.PrimerNombre?.[0] || "";
 
         setDatosCliente(response);
         setTotalPuntos(puntos);
         setStickers(stickers);
+        setName(name);
         setError(null);
       } catch (err) {
         console.error("Error obteniendo datos del cliente:", err);
@@ -69,70 +80,85 @@ export default function Home() {
     fetchCliente();
   }, [cliente, navigate]);
 
-  // ✅ Definir tarjetas de forma declarativa
-  const tarjetas = [
-    {
-      titulo: "Total de Puntos",
-      valor: totalPuntos,
-      icono: totalpuntosIcon,
-      bg: "bg-primary-subtle text-primary",
-    },
-    {
-      titulo: "Saldo disponible",
-      valor: datosCliente?.Saldo ?? "0.00",
-      icono: moneyIcon,
-      bg: "bg-success-subtle text-success",
-    },
-    {
-      titulo: "Stickers digitales",
-      valor: stickers,
-      icono: stickerIcon,
-      bg: "bg-danger-subtle text-danger",
-    },
-    {
-      titulo: "Tarjeta",
-      valor: datosCliente?.NumeroTarjeta ?? "—",
-      icono: creditcardIcon,
-      bg: "bg-dark-subtle text-dark",
-    },
-  ];
 
   // 🧭 Render principal
   return (
-    <div className="container py-4">
-      {/* HEADER */}
-      <div className="mb-4">
-        <div className="d-flex align-items-center gap-2">
-          <h2 className="mb-0">Bienvenido, {cliente?.nombre || "Cliente"}</h2>
-          <img
-            src={hiIcon}
-            alt="Saludo"
-            style={{ width: "32px", height: "auto" }}
-          />
+    <>
+      <div
+        className="container m-4 p-4 rounded-4"
+        style={{ backgroundColor: "rgba(247, 247, 247)" }}
+      >
+        {/* HEADER */}
+        <div
+          className="mb-4"
+          style={{ backgroundColor: "rgba(247, 247, 247)" }}
+        >
+          <div className="d-flex align-items-center gap-2 ">
+            <h2 className="mb-0 text-secondary-emphasis">Bienvenido, <b className="bg-primary-subtle px-2 rounded-4 text-primary-emphasis">{name || "Cliente"}</b></h2>
+            <img
+              src={hiIcon}
+              alt="Saludo"
+              style={{ width: "32px", height: "auto" }}
+            />
+          </div>
+          <p className="text-secondary mb-0">
+            Consulta y administra tus beneficios de manera rápida.
+          </p>
         </div>
-        <p className="text-secondary mb-0">
-          Consulta y administra tus beneficios de manera rápida.
-        </p>
       </div>
 
-      {/* ESTADOS */}
-      {loading && <p className="text-muted">Cargando datos...</p>}
-      {error && <p className="text-danger">{error}</p>}
+      <div
+        className="container m-4 p-4 rounded-4"
+        style={{ backgroundColor: "rgba(247, 247, 247)" }}
+      >
+        {/* ESTADOS */}
+        {loading && <p className="text-muted">Cargando datos...</p>}
+        {error && <p className="text-danger">{error}</p>}
 
-      {/* TARJETAS */}
-      {!loading && !error && (
-        <div className="row g-3">
-          {tarjetas.map((card, index) => (
-            <div key={index} className={`col-12 col-sm-6 col-md-3 p-3 rounded ${card.bg}`}>
-              <div className="d-flex justify-content-between align-items-center mb-2">
-                <h5 className="mb-0">{card.titulo}</h5>
-                <img src={card.icono} alt={card.titulo} style={{ width: "24px" }} />
-              </div>
-              <h3 className="fw-bold">{card.valor}</h3>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+        {/* TARJETAS */}
+        {!loading && !error && (
+          <div className="container col-12 border-1 gap-3 row">
+            <Card
+
+              className="col-12 col-sm-6 col-md-3 p-3 rounded-3"
+              title="Total de Puntos"
+              content="Acomula puntos con cada compra"
+              totales={totalPuntos}
+              gradientIni="#3559a1"
+              gradientEnd="#5695db"
+              icon="star"
+            />
+            <Card
+              className="col-12 col-sm-6 col-md-3 p-3 rounded-3"
+              title="Saldo Puntos"
+              content="Puntos equivalentes a dinero"
+              totales={saldoPuntos}
+              gradientIni="#1b5f3f"
+              gradientEnd="#3ca66d"
+              icon="currency-dollar"
+            />
+            <Card
+              className="col-12 col-sm-6 col-md-3 p-3 rounded-3"
+              title="Stickers"
+              content="Colecciona stickers con cada compra"
+              totales={stickers}
+              gradientIni="#EF3E42"
+              gradientEnd="#FF6A6B"
+              icon="ticket"
+            />
+
+            <Card
+              className="col-12 col-sm-6 col-md-3 p-3 rounded-3"
+              title="Tarjeta de Crédito"
+              content="Administra tu tarjeta de crédito"
+              totales=""
+              gradientIni="#1b5f3f"
+              gradientEnd="#3ca66d"
+              icon="credit-card"
+            />
+          </div>
+        )}
+      </div>
+    </>
   );
 }
