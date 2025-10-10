@@ -10,7 +10,7 @@ import stickerIcon from "../assets/svg/stickerIcon.svg";
 import totalpuntosIcon from "../assets/svg/totalpuntosicon.svg";
 import moneyIcon from "../assets/svg/moneyicon.svg";
 import creditcardIcon from "../assets/svg/creditcard.svg";
-import header from "../assets/header.png";
+import puntodeoro from "../assets/puntoDeOro.png";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ export default function Home() {
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  let saldoPuntos = ((totalPuntos * 0.22)/100).toFixed(2);
+  let saldoPuntos = ((totalPuntos * 0.22) / 100).toFixed(2);
 
   // ✅ Verificar token al montar
   useEffect(() => {
@@ -80,32 +80,49 @@ export default function Home() {
     fetchCliente();
   }, [cliente, navigate]);
 
-
   // 🧭 Render principal
   return (
     <>
       <div
-        className="container m-4 p-4 rounded-4"
-        style={{ backgroundColor: "rgba(247, 247, 247)" }}
-      >
-        {/* HEADER */}
-        <div
-          className="mb-4"
-          style={{ backgroundColor: "rgba(247, 247, 247)" }}
-        >
-          <div className="d-flex align-items-center gap-2 ">
-            <h2 className="mb-0 text-secondary-emphasis">Bienvenido, <b className="bg-primary-subtle px-2 rounded-4 text-primary-emphasis">{name || "Cliente"}</b></h2>
-            <img
-              src={hiIcon}
-              alt="Saludo"
-              style={{ width: "32px", height: "auto" }}
-            />
-          </div>
-          <p className="text-secondary mb-0">
-            Consulta y administra tus beneficios de manera rápida.
-          </p>
-        </div>
-      </div>
+  className="container m-4 p-4 rounded-4 row bg-primary-subtle position-relative overflow-visible"
+  style={{ backgroundColor: "rgba(247, 247, 247)" }}
+>
+  {/* HEADER */}
+  <div className="col-12 mb-4">
+    <div className="d-flex align-items-center gap-2">
+      <h2 className="mb-0 text-secondary-emphasis">
+        Bienvenido,{" "}
+        <b className="px-2 rounded-4 text-primary-emphasis">
+          {name || "Cliente"}
+        </b>
+      </h2>
+      <img
+        src={hiIcon}
+        alt="Saludo"
+        style={{ width: "32px", height: "auto" }}
+      />
+    </div>
+    <p className="text-secondary mb-0">
+      Consulta y administra tus beneficios de manera rápida.
+    </p>
+  </div>
+
+  {/* Imagen decorativa sobresaliente */}
+  <div className="col-12 d-flex justify-content-end">
+    <img
+      className="position-absolute top-50 translate-middle-y"
+      src={puntodeoro}
+      alt="Header"
+      style={{
+        width: "300px",
+        top: "100%", // la empuja al borde inferior
+        transform: "translateY(-20%)", // sobresale un poco
+        zIndex: 10,
+      }}
+    />
+  </div>
+</div>
+
 
       <div
         className="container m-4 p-4 rounded-4"
@@ -119,15 +136,14 @@ export default function Home() {
         {!loading && !error && (
           <div className="container col-12 border-1 gap-3 row">
             <Card
-
-              className="col-12 col-sm-6 col-md-3 p-3 rounded-3"
               title="Total de Puntos"
-              content="Acomula puntos con cada compra"
+              content="Totoal de puntos Acumulados"
               totales={totalPuntos}
               gradientIni="#3559a1"
-              gradientEnd="#5695db"
-              icon="star"
+              gradientEnd="#4f7dd1"
+              icon="trophy"
             />
+
             <Card
               className="col-12 col-sm-6 col-md-3 p-3 rounded-3"
               title="Saldo Puntos"
@@ -149,7 +165,7 @@ export default function Home() {
 
             <Card
               className="col-12 col-sm-6 col-md-3 p-3 rounded-3"
-              title="Tarjeta de Crédito"
+              title="Rey Scotia"
               content="Administra tu tarjeta de crédito"
               totales=""
               gradientIni="#1b5f3f"
