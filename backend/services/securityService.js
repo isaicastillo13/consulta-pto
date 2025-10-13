@@ -18,7 +18,7 @@ import { poolPromise, sql } from '../config/db.js';
 export const getSecurityQuestionsFromDB = async () => {
   try {
     const pool = await poolPromise;
-    const result = await pool.request().query('SELECT * FROM PDO.PreguntasSeguridad');
+    const result = await pool.request().query('EXEC sp_ObtenerPreguntasSeguridad');
     console.log('Preguntas de seguridad obtenidas:', result.recordset);
     return result.recordset; // recordset trae los resultados en forma de array de objetos
   } catch (err) {

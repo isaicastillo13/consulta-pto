@@ -1,14 +1,29 @@
 import { supabase } from "../lib/supabaseClient.js";
 import bcrypt from "bcryptjs";
+import { poolPromise, sql } from '../config/db.js';
+
+
 
 export const createUser = async (userData) => {
-  const { data, error } = await supabase.from("usuarios").insert([userData]);
-  if (error) {
-    console.log("|------Insertar Usuario en la BD------|");
-    console.error("Error creando usuario:", error);
+  try {
+    const pool = await sql.connect(dbConfig);
+
+    const result = await pool
+      .request()
+      .input('Nombre', sql.NVarChar(100), userData.nombre)
+      .input('Cedula', sql.NVarChar(50), userData.cedula)
+      .input('IdPregunta', sql.Int, userData.idpregunta)
+      .input('Respuesta', sql.NVarChar(255), userData.respuesta)
+      .execute('sp_InsertarUsuario');
+
+    console.log('Usuario insertado con éxito');
+    return result;
+  } catch (error) {
+    console.error('Error al insertar usuario:', error);
     throw error;
+  } finally {
+    sql.close();
   }
-  return data;
 };
 
 export const findUserByCedula = async (cedula) => {
