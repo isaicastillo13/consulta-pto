@@ -73,7 +73,7 @@ export default function Register() {
   const questionOptions = useMemo(() => {
     return securityQuestions.map(question => ({
       value: question.id,
-      label: question.preguntas
+      label: question.pregunta
     }));
   }, [securityQuestions]);
 

@@ -1,17 +1,31 @@
-import postgres from "postgres";
-import dotenv from "dotenv";
-import path from "path";
-import { fileURLToPath } from "url";
+import sql from 'mssql';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Configuración de la conexión
+const dbConfig = {
+  server: 'rtxdbtest',
+  user: 'usr-rhqdbtest',          // 👈 Usuario
+  password: 'LaMupE03x',          // 👈 Contraseña
+  database: 'MERC',
+  options: {
+    encrypt: false,
+    trustServerCertificate: true
+  },
+  connectionTimeout: 300000,
+  pool: {
+    min: 20,
+    max: 15000,
+  }
+};
 
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+// Crear un pool de conexión
+const poolPromise = sql.connect(dbConfig)
+  .then(pool => {
+    console.log('Conectado a SQL Server');
+    return pool;
+  })
+  .catch(err => {
+    console.error('Error conectando a SQL Server:', err);
+    throw err;
+  });
 
-if (!process.env.DATABASE_URL) {
-  console.error("DATABASE_URL no está definido");
-  process.exit(1);
-}
-
-const sql = postgres(process.env.DATABASE_URL);
-export default sql;
+export { sql, poolPromise };
