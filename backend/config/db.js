@@ -14,7 +14,7 @@ const dbConfig = {
     encrypt: process.env.DB_ENCRYPT === 'true',
     trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true' // Ajustar según sea necesario
   },
-  connectionTimeout: 300000,
+  connectionTimeout: 60000, // 60 segundos
   pool: {
     min: 20,
     max: 15000,

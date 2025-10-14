@@ -40,7 +40,7 @@ export const registerUser = async (req, res) => {
   } catch (error) {
     console.log("|------Controllador de Registro------|");
     console.error("Error registrando usuario:", error);
-    res.status(500).json({ error: "Error registrando usuario" });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -58,7 +58,6 @@ export const validateUserByCedula = async (req, res) => {
 
     const response = await findUserByCedula(cedulaLogin);
 
-    console.log(response);
     if (response.Existe === 0) {
       return res.status(404).json({
         success: false,

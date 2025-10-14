@@ -60,11 +60,11 @@ app.use("/api/cliente", clienteRoutes);
 
 app.listen(PORT, () => {
   console.log("|----------------------------------------|");
-  console.log("🛠️ Iniciando servidor...");
+  console.log("Iniciando servidor...");
   console.log(
-    "🔧 Variables de entorno:",
+    "Variables de entorno:",
     process.env.SUPABASE_URL ? "Configuradas" : "No Configuradas"
   );
-  console.log(`🚀 Servidor en http://localhost:${PORT}`);
+  console.log(`Servidor en http://localhost:${PORT}`);
   console.log("|----------------------------------------|");
 });

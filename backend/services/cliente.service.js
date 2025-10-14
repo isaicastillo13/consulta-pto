@@ -8,6 +8,7 @@ dotenv.config();
  * Construye el XML SOAP completo para VerificarCliente
  */
 function buildVerificarClienteXML({ identificacion, fecha }) {
+ 
   return `<?xml version="1.0" encoding="utf-8"?>
   <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:wsp="http://wsposite.smrey.net/">
     <soap:Header/>
@@ -34,7 +35,7 @@ function buildVerificarClienteXML({ identificacion, fecha }) {
 }
 
 function buildConsultarClienteXML({ numeroCliente, numeroCuenta, fecha }) {
-  console.log("Construyendo XML para ConsultarCliente con:", { numeroCliente, numeroCuenta, fecha });
+
   return `<?xml version="1.0" encoding="utf-8"?>
   <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:wsp="http://wsposite.smrey.net/">
     <soap:Header/>
@@ -63,6 +64,7 @@ function buildConsultarClienteXML({ numeroCliente, numeroCuenta, fecha }) {
  * Envía la petición SOAP y devuelve el objeto parseado
  */
 export async function verificarClienteService(data) {
+
   //Construir XML
   const xml = buildVerificarClienteXML(data);
 

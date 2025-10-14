@@ -21,7 +21,7 @@ export async function verificarClienteController(req, res) {
     });
 
   } catch (error) {
-    console.error("❌ Error en verificarClienteController:", error);
+    console.error("Error en verificarClienteController:", error);
     res.status(500).json({
       ok: false,
       error: error.message || "Error interno en el servidor",
