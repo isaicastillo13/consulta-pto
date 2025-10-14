@@ -40,7 +40,7 @@ export const userService = {
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.error || "Error al validar cédula");
+      throw new Error(errorData.error || "Usuario no encontrado");
     }
     return response.json();
   },

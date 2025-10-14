@@ -28,10 +28,11 @@ const corsOptions = {
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
 };
+
 app.use(cors(corsOptions));
 app.use(express.json());
 
-// Debug mejorado
+// Debug Mejorado
 app.get("/api/debug", (req, res) => {
   const dbUrl = process.env.DATABASE_URL;
   const envPath = path.resolve(__dirname, "./.env");
@@ -57,14 +58,12 @@ app.use("/api/users", userRoutes);
 app.use("/api/auth", userRoutes);
 app.use("/api/cliente", clienteRoutes);
 
-
-
 app.listen(PORT, () => {
   console.log("|----------------------------------------|");
   console.log("🛠️ Iniciando servidor...");
   console.log(
     "🔧 Variables de entorno:",
-    process.env.SUPABASE_URL ? "✅ Configuradas" : "❌ No configuradas"
+    process.env.SUPABASE_URL ? "Configuradas" : "No Configuradas"
   );
   console.log(`🚀 Servidor en http://localhost:${PORT}`);
   console.log("|----------------------------------------|");

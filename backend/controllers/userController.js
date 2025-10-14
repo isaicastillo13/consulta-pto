@@ -6,9 +6,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const registerUser = async (req, res) => {
-
   try {
-    
     const { name, cedula, pregunta, respuesta } = req.body;
     const userData = {
       Nombre: name,
@@ -58,15 +56,22 @@ export const validateUserByCedula = async (req, res) => {
       });
     }
 
-    const idUser = await findUserByCedula(cedulaLogin);
-    return res.json({
-      success: true,
-      user: idUser,
-      message: "Usuario encontrado, requiere validar respuesta",
-    });
+    const response = await findUserByCedula(cedulaLogin);
+
+    console.log(response);
+    if (response.Existe === 0) {
+      return res.status(404).json({
+        success: false,
+        Mensaje: response.Mensaje,
+      });
+    } else {
+      return res.json({
+        success: true,
+        message: response.Mensaje,
+      });
+    }
   } catch (error) {
-    console.log("|------Controlador de Usuarios------|");
-    console.error("Error validando cédula:", error);
+    console.error("Error buscando usuario:", error);
 
     return res.status(500).json({
       success: false,
@@ -79,6 +84,7 @@ export const validateSecurityAnswer = async (req, res) => {
   try {
     const cedulaLogin = req.body.cedula;
     const respuestaLogin = req.body.respuesta;
+    
     await hashRespuesta(cedulaLogin, respuestaLogin);
 
     const token = jwt.sign(
@@ -106,6 +112,6 @@ export const verifyTokenStatus = (req, res) => {
   return res.json({
     success: true,
     message: "Token válido",
-    user: req.user
+    user: req.user,
   });
 };

@@ -34,39 +34,61 @@ export const createUser = async (userData) => {
 
 
 export const findUserByCedula = async (cedula) => {
-  const { data, error } = await supabase
-    .from("usuarios")
-    .select("*")
-    .eq("cedula", cedula)
-    .single()
-    .limit(1);
+  let pool;
+  try{
+    pool = await poolPromise;
+    const result = await pool
+      .request()
+      .input('Cedula', sql.NVarChar(50), cedula)
+      .execute('sp_ValidarUsuarioPorCedula');
 
-  if (error) {
-    console.log("|------Servicio de Usuarios------|");
-    console.error("Error buscando usuario por cédula:", error);
+      
+      if(result.recordset[0].Existe === 0) {
+        return result.recordset[0];
+      }else{
+        return result.recordset[0];
+      }
+  }catch(error){
+    console.error('Error al buscar usuario por cédula:', error);
     throw error;
+  }finally {
+    if(pool){
+      pool.close();
+    }
   }
-  return data;
 };
 
+
 export const hashRespuesta = async (cedula, respuesta) => {
-  const salt = await bcrypt.genSalt(10);
-  const respuestaHash = await bcrypt.hash(respuesta, salt);
+  let pool;
+  try {
+    pool = await poolPromise;
 
-  const { data, error } = await supabase
-    .from("usuarios")
-    .select("*")
-    .eq("cedula", cedula)
-    .single()
-    .limit(1);
+    // Ejecutar el procedimiento almacenado
+    const result = await pool
+      .request()
+      .input("Cedula", sql.NVarChar(50), cedula)
+      .execute("sp_ObtenerRespuestaHashPorCedula");
 
-    const isMatch = await bcrypt.compare(respuesta, data.respuesta_hash);
+    const hashGuardado = result.recordset[0]?.Respuesta;
 
+    if (!hashGuardado) {
+      throw new Error("Usuario no encontrado o sin respuesta registrada.");
+    }
 
-  if (error || !isMatch) {
-    console.log("|------Servicio de Usuarios------|");
-    console.error("Error hasheando respuesta:", error);
+    // Comparar la respuesta con el hash almacenado
+    const isMatch = await bcrypt.compare(respuesta, hashGuardado);
+
+    if (!isMatch) {
+      throw new Error("Respuesta incorrecta.");
+    }
+
+    return isMatch;
+  } catch (error) {
+    console.error("|------Servicio de Validación de Respuesta------|");
+    console.error("Error validando respuesta:", error);
     throw error;
+  } finally {
+    if (pool) pool.close();
   }
-  return isMatch;
 };

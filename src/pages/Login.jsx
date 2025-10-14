@@ -108,6 +108,7 @@ export default function Login() {
 
   // Validar cédula con mejor manejo de errores
   const validateCedula = useCallback(async () => {
+    
     if (!isValidCedulaFormat(formData.cedula)) {
       setFormState(FORM_STATES.ERROR);
       setValidationMessage("Formato de cédula inválido");
@@ -122,6 +123,7 @@ export default function Login() {
       setValidationMessage(response.message || "Cédula válida. Ingresa tu respuesta.");
       setError(null);
       return true;
+
     } catch (error) {
       console.error("Error validando cédula:", error);
       setFormState(FORM_STATES.ERROR);
