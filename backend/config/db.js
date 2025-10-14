@@ -6,12 +6,12 @@ dotenv.config();
 
 // Configuración de la conexión
 const dbConfig = {
-  server: process.env.DB_SERVER,
-  user: process.env.DB_USER,          // 👈 Usuario
-  password: process.env.DB_PASSWORD,          // 👈 Contraseña
-  database: process.env.DB_NAME,
+  server: "rtxdbtest",
+  user: "usr-rhqdbtest",
+  password: "LaMupE03x",
+  database: "MERC",
   options: {
-    encrypt: process.env.DB_ENCRYPT === 'true', // Usar encriptación si es true
+    encrypt: process.env.DB_ENCRYPT === 'true',
     trustServerCertificate: process.env.DB_TRUST_SERVER_CERTIFICATE === 'true' // Ajustar según sea necesario
   },
   connectionTimeout: 300000,

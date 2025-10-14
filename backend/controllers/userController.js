@@ -6,35 +6,41 @@ import dotenv from "dotenv";
 dotenv.config();
 
 export const registerUser = async (req, res) => {
+
   try {
+    
     const { name, cedula, pregunta, respuesta } = req.body;
     const userData = {
-      nombre: name,
-      cedula,
-      id_pregunta: pregunta,
-      respuesta,
+      Nombre: name,
+      Cedula: cedula,
+      IdPregunta: pregunta,
+      Respuesta: respuesta,
     };
 
     // Hashear la respuesta antes de guardarla
     const salt = await bcrypt.genSalt(10);
-    const hashedRespuesta = await bcrypt.hash(userData.respuesta, salt);
-    userData.respuesta = hashedRespuesta;
+    const hashedRespuesta = await bcrypt.hash(userData.Respuesta, salt);
+    userData.Respuesta = hashedRespuesta;
     // fin del hash
 
     // Validar que los campos requeridos estén presentes
     if (
-      !userData.nombre ||
-      !userData.cedula ||
-      !userData.id_pregunta ||
-      !userData.respuesta
+      !userData.Nombre ||
+      !userData.Cedula ||
+      !userData.IdPregunta ||
+      !userData.Respuesta
     ) {
       return res.status(400).json({ error: "Faltan campos requeridos" });
     }
 
     const newUser = await createUser(userData);
-    res.status(201).json(newUser);
+    res.status(201).json({
+      success: true,
+      message: "Usuario registrado exitosamente",
+      rowsAffected: newUser, // esto debería ser [1] si todo salió bien
+    });
   } catch (error) {
-    console.log("|------Controllador de Registro de u------|");
+    console.log("|------Controllador de Registro------|");
     console.error("Error registrando usuario:", error);
     res.status(500).json({ error: "Error registrando usuario" });
   }

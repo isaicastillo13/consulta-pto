@@ -12,6 +12,7 @@ export const userService = {
 
   // Registrar usuario
   async register(userData) {
+   
     const response = await fetch(`${API_BASE_URL}/users/register`, {
       method: "POST",
       headers: {

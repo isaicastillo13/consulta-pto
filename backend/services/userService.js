@@ -1,30 +1,37 @@
 import { supabase } from "../lib/supabaseClient.js";
 import bcrypt from "bcryptjs";
-import { poolPromise, sql } from '../config/db.js';
-
-
+import sql from "mssql";
+import { poolPromise} from '../config/db.js';
 
 export const createUser = async (userData) => {
+  let pool;
   try {
-    const pool = await sql.connect(dbConfig);
+    // 1. Conectar al pool
+    pool = await poolPromise;
 
+    // 2. Ejecutar el SP con parámetros seguros
+    
     const result = await pool
       .request()
-      .input('Nombre', sql.NVarChar(100), userData.nombre)
-      .input('Cedula', sql.NVarChar(50), userData.cedula)
-      .input('IdPregunta', sql.Int, userData.idpregunta)
-      .input('Respuesta', sql.NVarChar(255), userData.respuesta)
+      .input('Nombre', sql.NVarChar(100), userData.Nombre)
+      .input('Cedula', sql.NVarChar(50), userData.Cedula)
+      .input('IdPregunta', sql.Int, userData.IdPregunta)
+      .input('Respuesta', sql.NVarChar(255), userData.Respuesta)
       .execute('sp_InsertarUsuario');
 
-    console.log('Usuario insertado con éxito');
-    return result;
+
+    return result.rowsAffected; // o result.rowsAffected según tu SP
   } catch (error) {
     console.error('Error al insertar usuario:', error);
     throw error;
   } finally {
-    sql.close();
+    // 3. Cierra la conexión solo si existe
+    if (pool) {
+      pool.close();
+    }
   }
 };
+
 
 export const findUserByCedula = async (cedula) => {
   const { data, error } = await supabase
