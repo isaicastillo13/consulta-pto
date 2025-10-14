@@ -1,5 +1,5 @@
 import { createUser } from "../services/userService.js";
-import bcrypt, { hash } from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { findUserByCedula, hashRespuesta } from "../services/userService.js";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";

@@ -4,7 +4,6 @@ import cors from "cors";
 import { config } from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
-import { Route } from "react-router-dom";
 import securityRoutes from "./routes/securityRoute.js";
 import userRoutes from "./routes/userRoute.js";
 import clienteRoutes from "./routes/cliente.routes.js";
