@@ -1,0 +1,137 @@
+﻿@page "/"
+@using ConsultaPto.Client.Services
+@using ConsultaPto.Shared.Models
+@inject UsuariosService UsuariosService
+
+<div class="container py-5">
+    <h2 class="text-center mb-4">Inicio de sesión</h2>
+
+    @if (!string.IsNullOrEmpty(mensaje))
+    {
+        <div class="alert @mensajeClase text-center mx-auto" style="max-width: 500px;" role="alert">
+            @mensaje
+        </div>
+    }
+
+    @* Paso 1: solo se muestra mientras NO haya pasado a la segunda etapa *@
+    @if (!mostrarSegundaEtapa)
+    {
+        <EditForm Model="@cedulaRequest" OnValidSubmit="@ConsultarCedula" id="consultarCedula" class="p-4 shadow rounded-3 bg-white mx-auto mt-3" style="max-width: 500px;">
+            <DataAnnotationsValidator />
+
+            <div class="mb-3">
+                <div class="form-floating">
+                    <InputText id="cedulaInput" @bind-Value="cedulaRequest.Cedula" class="form-control rounded-pill" placeholder="Cédula" />
+                    <label for="cedulaInput">Cédula</label>
+                </div>
+
+                <ValidationMessage For="@(() => cedulaRequest.Cedula)" />
+
+                @if (!string.IsNullOrEmpty(cedulaError))
+                {
+                    <div class="text-danger small mt-1">@cedulaError</div>
+                }
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 rounded-pill">Consultar</button>
+        </EditForm>
+    }
+
+    @* Paso 2: solo se muestra cuando el usuario fue encontrado *@
+    @if (mostrarSegundaEtapa)
+    {
+        <EditForm Model="@loginRequest" OnValidSubmit="@ValidarRespuesta"
+                  class="p-4 shadow rounded-3 bg-white mx-auto mt-3" style="max-width: 500px;">
+            <DataAnnotationsValidator />
+
+            <!-- Cédula arriba, solo lectura -->
+            <div class="mb-3">
+                <label class="form-label">Cédula</label>
+                <input class="form-control rounded-pill" value="@loginRequest.Cedula" disabled />
+            </div>
+
+            <!-- Pregunta de seguridad, solo lectura -->
+            <div class="mb-3">
+                <label class="form-label">Pregunta de seguridad</label>
+                <input class="form-control rounded-pill" value="@preguntaSeguridad" disabled />
+            </div>
+
+            <!-- Respuesta -->
+            <div class="form-floating mb-3">
+                <InputText id="respuestaInput" @bind-Value="loginRequest.Respuesta"
+                           class="form-control rounded-pill" 
+                           placeholder="Respuesta" />
+                <label for="respuestaInput">Respuesta</label>
+                <ValidationMessage For="@(() => loginRequest.Respuesta)" />
+            </div>
+
+            <button type="submit" class="btn btn-success w-100 rounded-pill">Iniciar Sesión</button>
+        </EditForm>
+    }
+
+</div>
+
+@code {
+    private CedulaRequest cedulaRequest = new();
+    private LoginRequest loginRequest = new();
+    private bool mostrarSegundaEtapa = false;
+    private string? preguntaSeguridad;
+    private string? mensaje;
+    private string mensajeClase = "";
+    private string? cedulaError;
+
+    // Paso 1: Buscar usuario por cédula
+    private async Task ConsultarCedula()
+    {
+        mensaje = "";
+        cedulaError = null;
+        mostrarSegundaEtapa = false;
+
+        // normalizamos la cédula
+        var cedulaLimpia = cedulaRequest.Cedula?.Trim();
+
+        if (string.IsNullOrWhiteSpace(cedulaLimpia))
+        {
+            cedulaError = "La cédula es obligatoria.";
+            return;
+        }
+
+        var usuario = await UsuariosService.BuscarUsuarioPorCedula(cedulaLimpia);
+
+        if (usuario != null)
+        {
+            loginRequest.Cedula = cedulaLimpia;
+            loginRequest.Respuesta = string.Empty;
+
+            preguntaSeguridad = usuario.PreguntaSeguridad?.Pregunta;
+            mostrarSegundaEtapa = true;
+            mensajeClase = "alert alert-info";
+            mensaje = "Usuario encontrado. Responda su pregunta de seguridad.";
+        }
+        else
+        {
+            cedulaError = "No se encontró ningún usuario con esa cédula.";
+        }
+    }
+
+
+    // Paso 2: Validar respuesta
+    private async Task ValidarRespuesta()
+    {
+        mensaje = "";
+        var loginValido = await UsuariosService.ValidarLogin(loginRequest);
+
+        if (loginValido)
+        {
+            mensajeClase = "alert alert-success";
+            mensaje = "✅ Inicio de sesión exitoso.";
+            // aquí podrías redirigir
+
+        }
+        else
+        {
+            mensajeClase = "alert alert-danger";
+            mensaje = "❌ Respuesta incorrecta.";
+        }
+    }
+}

@@ -1,0 +1,135 @@
+﻿@page "/register"
+@using ConsultaPto.Client.Services
+@using ConsultaPto.Shared.Models
+@inject UsuariosService UsuariosService
+
+@if (preguntas == null)
+{
+    <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status"></div>
+        <p class="mt-3"><em>Cargando preguntas...</em></p>
+    </div>
+}
+else
+{
+    <div class="container py-5">
+        <div class="text-center mb-4">
+            <img src="/images/banners/banner_header.png" alt="Banner Header" class="img-fluid" />
+        </div>
+
+        @if (!string.IsNullOrEmpty(mensaje))
+        {
+            <div class="@mensajeClase fade show mt-3 text-center" role="alert" style="transition: all 0.4s ease;">
+                @mensaje
+            </div>
+        }
+        
+
+        <EditForm Model="@usuario" OnValidSubmit="@GuardarUsuario" class="form-container shadow-sm rounded-4 p-4 mx-auto bg-white">
+            <DataAnnotationsValidator />
+            @* <ValidationSummary/> *@
+            <div class="row g-4">
+          
+                <!-- Columna izquierda -->
+                <div class="col-12 col-md-6">
+                    <div class="form-floating mb-3">
+                        <InputText id="nombreInput" @bind-Value="usuario.Nombre" class="form-control rounded-pill" placeholder="Nombre completo" />
+                        <label for="nombreInput">Nombre</label>
+                        <ValidationMessage For="@(() => usuario.Nombre)" class="text-danger small mt-1" />
+                    </div>
+                    <div class="form-floating mb-3">
+                        <InputText id="cedulaInput" @bind-Value="usuario.Cedula" class="form-control rounded-pill" placeholder="Cédula" />
+                        <label for="cedulaInput">Cédula</label>
+                        <ValidationMessage For="@(() => usuario.Cedula)" class="text-danger small mt-1" />
+                    </div>
+                </div>
+
+                <!-- Columna derecha -->
+                <div class="col-12 col-md-6">
+                    <div class="form-floating mb-3">
+                        <InputSelect id="preguntaInput" @bind-Value="usuario.IdPregunta" class="form-select rounded-pill">
+                            <option value="">Seleccione...</option>
+                            @foreach (var p in preguntas)
+                            {
+                                <option value="@p.Id">@p.Pregunta</option>
+                            }
+                        </InputSelect>
+                        <label for="preguntaInput">Pregunta de seguridad</label>
+                        <ValidationMessage For="@(() => usuario.IdPregunta)" class="text-danger small mt-1" />
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <InputText id="respuestaInput" @bind-Value="usuario.Respuesta" class="form-control rounded-pill" placeholder="Respuesta" />
+                        <label for="respuestaInput">Respuesta</label>
+                        <ValidationMessage For="@(() => usuario.Respuesta)" class="text-danger small mt-1" />
+                    </div>
+
+                    <div class="text-end mt-4">
+                        <button type="submit" class="btn btn-primary px-5 rounded-pill shadow-sm" disabled="@procesando">
+                            @if (procesando)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                @* Guardando... *@
+                                                }
+                            else
+                            {
+                                <span>Registrar</span>
+                            }
+                        </button>
+
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+}
+
+@code {
+    private Usuario usuario = new();
+    private List<PreguntaSeguridad>? preguntas;
+
+    private string? mensaje;
+    private string mensajeClase = "";
+    private bool procesando = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        preguntas = await UsuariosService.GetPreguntas();
+    }
+
+    private async Task GuardarUsuario()
+    {
+        procesando = true;
+        mensaje = null;
+        StateHasChanged(); // 🔄 fuerza actualización inmediata del spinner
+
+        try
+        {
+            await UsuariosService.RegistrarUsuario(usuario);
+
+            mensaje = "✅ Usuario registrado con éxito.";
+            mensajeClase = "alert alert-success mt-4";
+            usuario = new Usuario();
+
+            StateHasChanged(); // 🔄 actualiza para mostrar el mensaje y volver el botón
+
+            // Espera un poco antes de limpiar el mensaje
+            await Task.Delay(3000);
+
+            mensaje = null;
+            StateHasChanged(); // 🔄 vuelve a refrescar
+        }
+        catch (Exception ex)
+        {
+            mensaje = $"❌ Error al registrar: {ex.Message}";
+            mensajeClase = "alert alert-danger mt-4";
+            StateHasChanged(); // 🔄 muestra el error en pantalla
+        }
+        finally
+        {
+            procesando = false;
+            StateHasChanged(); // 🔄 actualiza el botón al estado normal
+        }
+    }
+}
+

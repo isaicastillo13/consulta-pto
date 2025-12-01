@@ -1,0 +1,28 @@
+## Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build results
+bin/
+obj/
+Debug/
+Release/
+
+## ASP.NET Scaffolding
+ScaffoldingReadMe.txt
+
+## Backup & cache
+*.db
+*.cache
+*.config.user
+
+## Visual Studio Code
+.vscode/
+
+## other
+_ReSharper*/
+*.resharper
+*.DotSettings.user
