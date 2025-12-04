@@ -1,0 +1,221 @@
+﻿@page "/dashboard"
+@inject UsuariosService UsuariosService
+@inject SesionUsuarioService SesionUsuario
+@inject NavigationManager Nav
+
+<div class="pto-dashboard-wrapper">
+
+    <div class="pto-dashboard-header">
+        <h1>Bienvenido @dashboard.PrimerNombre @dashboard.PrimerApellido</h1>
+        <p>Consulta tus puntos, stickers y estado Cobrand de tu cuenta Punto de Oro.</p>
+    </div>
+
+    @if (isLoading)
+    {
+        <div class="text-center mt-5">
+            <div class="spinner-border text-primary mb-3" role="status"></div>
+            <p>Cargando información del cliente...</p>
+        </div>
+    }
+    else if (errorMessage is not null)
+    {
+        <div class="alert alert-danger mt-3">
+            @errorMessage
+        </div>
+    }
+    else if (dashboard is not null)
+    {
+        <!-- Fila principal de tarjetas -->
+        <div class="pto-summary-row">
+
+            <!-- Total puntos (tarjeta principal) -->
+            <div class="pto-card-summary primary">
+                <div>
+                    <div class="pto-card-summary-header">
+                        <div class="pto-card-summary-title">Puntos totales</div>
+                        <div class="pto-card-summary-icon">
+                            ↑
+                        </div>
+                    </div>
+
+                    <div class="pto-card-summary-value">@dashboard.PuntosCliente</div>
+                    <div class="pto-card-summary-secondary">
+                        Aproximadamente @puntosEnDolares.ToString("0.00") USD en recompensas.
+                    </div>
+                </div>
+
+                <div class="pto-card-summary-footer">
+                    Información basada en el saldo actual de tu programa Punto de Oro.
+                </div>
+            </div>
+
+            <!-- Stickers -->
+            <div class="pto-card-summary secondary">
+                <div class="pto-card-summary-header">
+                    <div class="pto-card-summary-title">Stickers acumulados</div>
+                    <div class="pto-card-summary-icon">
+                        →
+                    </div>
+                </div>
+
+                <div class="pto-card-summary-value">@dashboard.StickersCliente</div>
+                <div class="pto-card-summary-footer">
+                    Puedes canjearlos según las promociones vigentes.
+                </div>
+            </div>
+
+            <!-- Relación Cobrand (es cliente ReyScotia) -->
+            <div class="pto-card-summary secondary">
+                <div class="pto-card-summary-header">
+                    <div class="pto-card-summary-title">Relación Cobrand</div>
+                    <div class="pto-card-summary-icon">
+                        ?
+                    </div>
+                </div>
+
+                <div class="pto-card-summary-value">
+                    @TextoCobCodigo
+                </div>
+                <div class="pto-card-summary-footer">
+                    @TextoCobTarjeta
+                </div>
+            </div>
+
+            <!-- Tipo de cliente (titular / adicional) -->
+            <div class="pto-card-summary secondary d-none d-lg-flex">
+                <div class="pto-card-summary-header">
+                    <div class="pto-card-summary-title">Tipo de cliente</div>
+                    <div class="pto-card-summary-icon">
+                        ℹ
+                    </div>
+                </div>
+
+                <div class="pto-card-summary-value">
+                    @TextoCobCliente
+                </div>
+                <div class="pto-card-summary-footer">
+                    N° Cliente: @dashboard.NumeroCliente<br />
+                    N° Cuenta: @dashboard.NumeroCuenta
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección inferior: detalle Cobrand, visible en todos los tamaños -->
+        <div class="pto-section-card">
+            <h4>Detalle de tu cuenta</h4>
+
+            <div class="row">
+                <div class="col-12 col-md-4 pto-status-item">
+                    <strong>Cliente:</strong>
+                    @dashboard.PrimerNombre @dashboard.PrimerApellido
+                </div>
+                <div class="col-12 col-md-4 pto-status-item">
+                    <strong>N° Cliente:</strong>
+                    @dashboard.NumeroCliente
+                </div>
+                <div class="col-12 col-md-4 pto-status-item">
+                    <strong>N° Cuenta:</strong>
+                    @dashboard.NumeroCuenta
+                </div>
+
+                <div class="col-12 col-md-4 pto-status-item mt-2">
+                    <strong>Rey Scotia:</strong>
+                    @TextoCobCodigo
+                </div>
+                <div class="col-12 col-md-4 pto-status-item mt-2">
+                    <strong>Numero de Tarjeta:</strong>
+                    @TextoCobTarjeta
+                </div>
+                <div class="col-12 col-md-4 pto-status-item mt-2">
+                    <strong>Tipo de cliente:</strong>
+                    @TextoCobCliente
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <p>No hay datos para mostrar.</p>
+    }
+
+</div>
+
+@code {
+    private bool isLoading = false;
+    private string? errorMessage;
+    private ConsultaDashboardResponseDto? dashboard;
+
+    private decimal puntosEnDolares;
+
+    private string TextoCobCodigo => dashboard?.CobCodigo switch
+    {
+        "0" => "No es cliente ReyScotia",
+        "1" => "No es cliente, sugerir afiliación en caja",
+        "2" => "Es cliente ReyScotia",
+        _ => $"Código desconocido ({dashboard?.CobCodigo})"
+    };
+
+    private string TextoCobTarjeta => dashboard?.CobTarjeta switch
+    {
+        "*" => "No tiene tarjeta",
+        string s when !string.IsNullOrEmpty(s) => $"Tiene tarjeta ({s})",
+        _ => "Información de tarjeta no disponible"
+    };
+
+    private string TextoCobCliente => dashboard?.CobCliente switch
+    {
+        "0" => "Titular",
+        string s when !string.IsNullOrEmpty(s) => $"Adicional (titular cliente #{s})",
+        _ => "Información de cliente adicional no disponible"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!SesionUsuario.EstaLogueado)
+        {
+            Nav.NavigateTo("/", replace: true);
+            return;
+        }
+
+        var documento = SesionUsuario.Cedula;
+        var tipoDocumento = SesionUsuario.TipoDocumento;
+
+        isLoading = true;
+        errorMessage = null;
+
+        try
+        {
+            dashboard = await UsuariosService.ConsultarDashboardAsync(documento, tipoDocumento);
+
+            if (dashboard is null)
+            {
+                errorMessage = "No se pudo obtener la información del cliente.";
+            }
+            else if (dashboard.CodigoRespuesta != "00")
+            {
+                errorMessage = dashboard.Mensaje;
+            }
+            else
+            {
+                puntosEnDolares = CalcularPuntosEnDolares(dashboard.PuntosCliente);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Ocurrió un error: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private decimal CalcularPuntosEnDolares(string puntosStr)
+    {
+        if (!int.TryParse(puntosStr, out var puntos))
+            return 0m;
+
+        const decimal PuntosPorDolar = 455m;
+        return Math.Round(puntos / PuntosPorDolar, 2);
+    }
+}

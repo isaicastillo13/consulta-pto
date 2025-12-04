@@ -1,9 +1,7 @@
-﻿using ConsultaPto.Server.Services;
+﻿using System.Threading.Tasks;
+using ConsultaPto.Server.Services;
 using ConsultaPto.Shared.SoapDtos;
 using Microsoft.AspNetCore.Mvc;
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ConsultaPto.Server.Controllers
 {
@@ -11,38 +9,55 @@ namespace ConsultaPto.Server.Controllers
     [Route("api/[controller]")]
     public class ClientesSoapController : ControllerBase
     {
-        private readonly ISoapClientesService _soap;
+        private readonly ISoapClientesService _soapClientesService;
 
-        public ClientesSoapController(ISoapClientesService soap)
+        public ClientesSoapController(ISoapClientesService soapClientesService)
         {
-            _soap = soap;
+            _soapClientesService = soapClientesService;
         }
 
-        // ✅ Endpoint JSON limpio
+        // DTO local para recibir el JSON desde el front
+        public class SoapVerificarRequest
+        {
+            public string Documento { get; set; } = string.Empty;
+            public int TipoDocumento { get; set; }
+        }
+
+        /// <summary>
+        /// Endpoint viejo que verifica cliente por documento/tipo y devuelve VerificarClienteSoapResult.
+        /// Lo dejamos funcionando para que UsuariosService.VerificarClienteSoapAsync siga sirviendo.
+        /// </summary>
         [HttpPost("verificar-json")]
-        public async Task<ActionResult<VerificarClienteResponseDto>> VerificarClienteJson(
-            [FromBody] VerificarClienteRequestDto dto)
+        public async Task<ActionResult<VerificarClienteSoapResult>> VerificarJson([FromBody] SoapVerificarRequest request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            if (request == null || string.IsNullOrWhiteSpace(request.Documento))
+            {
+                return BadRequest("Documento es requerido.");
+            }
 
-            var result = await _soap.VerificarClienteAsync(dto);
+            // Mapeamos al DTO que usa el servicio SOAP tipado
+            var verificarReq = new VerificarClienteRequestDto
+            {
+                Documento = request.Documento,
+                TipoDocumento = request.TipoDocumento
+            };
+
+
+
+            var resp = await _soapClientesService.VerificarClienteAsync(verificarReq);
+
+            // Mapeamos al DTO simple que ya usas en el cliente
+            var result = new VerificarClienteSoapResult
+            {
+                Flag = resp.Flag,
+                CodigoRespuesta = resp.CodigoRespuesta,
+                Mensaje = resp.Mensaje,
+                NumeroCliente = resp.NumeroCliente,
+                NumeroCuenta = resp.NumeroCuenta,
+                NumeroTarjeta = resp.NumeroTarjeta
+            };
+
             return Ok(result);
-        }
-
-        // (Opcional) Sigues teniendo el raw para debug
-        [HttpPost("verificar")]
-        [Consumes("text/plain", "application/xml", "text/xml")]
-        public async Task<IActionResult> VerificarCliente()
-        {
-            using var reader = new StreamReader(Request.Body, Encoding.UTF8);
-            var xmlPeticion = await reader.ReadToEndAsync();
-
-            if (string.IsNullOrWhiteSpace(xmlPeticion))
-                return BadRequest("El cuerpo de la petición está vacío.");
-
-            var result = await _soap.VerificarClienteRawAsync(xmlPeticion);
-            return Content(result, "text/xml");
         }
     }
 }

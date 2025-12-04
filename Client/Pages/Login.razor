@@ -2,136 +2,223 @@
 @using ConsultaPto.Client.Services
 @using ConsultaPto.Shared.Models
 @inject UsuariosService UsuariosService
+@inject SesionUsuarioService SesionUsuario
+@inject NavigationManager Nav
 
-<div class="container py-5">
-    <h2 class="text-center mb-4">Inicio de sesión</h2>
+<div class="pto-auth-wrapper">
 
-    @if (!string.IsNullOrEmpty(mensaje))
-    {
-        <div class="alert @mensajeClase text-center mx-auto" style="max-width: 500px;" role="alert">
-            @mensaje
+    <div class="pto-auth-card">
+
+        <div class="pto-auth-step-label">
+            Inicia sesión
         </div>
-    }
+        <div class="pto-auth-title">Consulta tus Puntos de Oro</div>
+        <div class="pto-auth-subtitle">
+            Primero validamos tu documento, luego tu pregunta de seguridad.
+        </div>
 
-    @* Paso 1: solo se muestra mientras NO haya pasado a la segunda etapa *@
-    @if (!mostrarSegundaEtapa)
-    {
-        <EditForm Model="@cedulaRequest" OnValidSubmit="@ConsultarCedula" id="consultarCedula" class="p-4 shadow rounded-3 bg-white mx-auto mt-3" style="max-width: 500px;">
-            <DataAnnotationsValidator />
+        @if (!string.IsNullOrEmpty(mensaje))
+        {
+            <div class="@mensajeClase text-center mb-3" role="alert">
+                @mensaje
+            </div>
+        }
 
-            <div class="mb-3">
-                <div class="form-floating">
-                    <InputText id="cedulaInput" @bind-Value="cedulaRequest.Cedula" class="form-control rounded-pill" placeholder="Cédula" />
-                    <label for="cedulaInput">Cédula</label>
+        @* Paso 1: consultar cédula / pasaporte *@
+        @if (!mostrarSegundaEtapa)
+        {
+            <EditForm Model="@cedulaRequest" OnValidSubmit="@ConsultarCedula" class="mt-2">
+                <DataAnnotationsValidator />
+
+                <div class="mb-3">
+                    <label class="form-label">Cédula o Pasaporte</label>
+                    <InputText @bind-Value="cedulaRequest.Cedula"
+                               class="form-control rounded-pill" />
+                    <ValidationMessage For="@(() => cedulaRequest.Cedula)" class="text-danger small mt-1" />
+
+                    @if (!string.IsNullOrEmpty(cedulaError))
+                    {
+                        <div class="text-danger small mt-1">@cedulaError</div>
+                    }
+                    <div class="pto-field-hint mt-1">
+                        Ejemplos: <strong>8-1234-5678</strong> (cédula) o <strong>PA1234567</strong> (pasaporte).
+                    </div>
                 </div>
 
-                <ValidationMessage For="@(() => cedulaRequest.Cedula)" />
+                <button type="submit"
+                        class="btn pto-btn-primary w-100 rounded-pill"
+                        disabled="@procesando">
+                    @if (procesando)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                        <span> Consultando...</span>
+                    }
+                    else
+                    {
+                        <span class="text-white">Continuar</span>
+                    }
+                </button>
+            </EditForm>
+        }
 
-                @if (!string.IsNullOrEmpty(cedulaError))
-                {
-                    <div class="text-danger small mt-1">@cedulaError</div>
-                }
-            </div>
+        @* Paso 2: pregunta de seguridad + correo *@
+        @if (mostrarSegundaEtapa)
+        {
+            <div class="pto-auth-divider"></div>
 
-            <button type="submit" class="btn btn-primary w-100 rounded-pill">Consultar</button>
-        </EditForm>
-    }
+            <EditForm Model="@loginRequest" OnValidSubmit="@ValidarRespuesta">
+                <DataAnnotationsValidator />
 
-    @* Paso 2: solo se muestra cuando el usuario fue encontrado *@
-    @if (mostrarSegundaEtapa)
-    {
-        <EditForm Model="@loginRequest" OnValidSubmit="@ValidarRespuesta"
-                  class="p-4 shadow rounded-3 bg-white mx-auto mt-3" style="max-width: 500px;">
-            <DataAnnotationsValidator />
+                <div class="mb-3">
+                    <label class="form-label">Documento</label>
+                    <input class="form-control rounded-pill"
+                           value="@loginRequest.Cedula"
+                           disabled />
+                </div>
 
-            <!-- Cédula arriba, solo lectura -->
-            <div class="mb-3">
-                <label class="form-label">Cédula</label>
-                <input class="form-control rounded-pill" value="@loginRequest.Cedula" disabled />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Pregunta de seguridad</label>
+                    <input class="form-control rounded-pill"
+                           value="@preguntaSeguridad"
+                           disabled />
+                </div>
 
-            <!-- Pregunta de seguridad, solo lectura -->
-            <div class="mb-3">
-                <label class="form-label">Pregunta de seguridad</label>
-                <input class="form-control rounded-pill" value="@preguntaSeguridad" disabled />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Respuesta</label>
+                    <InputText @bind-Value="loginRequest.Respuesta"
+                               class="form-control rounded-pill"
+                               placeholder="Escribe tu respuesta" />
+                    <ValidationMessage For="@(() => loginRequest.Respuesta)" class="text-danger small mt-1" />
+                </div>
 
-            <!-- Respuesta -->
-            <div class="form-floating mb-3">
-                <InputText id="respuestaInput" @bind-Value="loginRequest.Respuesta"
-                           class="form-control rounded-pill" 
-                           placeholder="Respuesta" />
-                <label for="respuestaInput">Respuesta</label>
-                <ValidationMessage For="@(() => loginRequest.Respuesta)" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Correo registrado</label>
+                    <InputText @bind-Value="loginRequest.Correo"
+                               class="form-control rounded-pill"
+                               placeholder="correo@ejemplo.com" />
+                    <ValidationMessage For="@(() => loginRequest.Correo)" class="text-danger small mt-1" />
+                </div>
 
-            <button type="submit" class="btn btn-success w-100 rounded-pill">Iniciar Sesión</button>
-        </EditForm>
-    }
+                <button type="submit"
+                        class="btn btn-success w-100 rounded-pill"
+                        disabled="@procesando">
+                    @if (procesando)
+                    {
+                        <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                        <span> Validando...</span>
+                    }
+                    else
+                    {
+                        <span>Iniciar sesión</span>
+                    }
+                </button>
+            </EditForm>
+        }
 
+    </div>
 </div>
 
 @code {
     private CedulaRequest cedulaRequest = new();
     private LoginRequest loginRequest = new();
+
     private bool mostrarSegundaEtapa = false;
+    private bool procesando = false;
+
     private string? preguntaSeguridad;
     private string? mensaje;
     private string mensajeClase = "";
     private string? cedulaError;
 
-    // Paso 1: Buscar usuario por cédula
+    // Paso 1: Buscar usuario por documento
     private async Task ConsultarCedula()
     {
         mensaje = "";
         cedulaError = null;
         mostrarSegundaEtapa = false;
 
-        // normalizamos la cédula
-        var cedulaLimpia = cedulaRequest.Cedula?.Trim();
-
-        if (string.IsNullOrWhiteSpace(cedulaLimpia))
+        var doc = cedulaRequest.Cedula?.Trim();
+        if (string.IsNullOrWhiteSpace(doc))
         {
-            cedulaError = "La cédula es obligatoria.";
+            cedulaError = "El documento es obligatorio.";
             return;
         }
 
-        var usuario = await UsuariosService.BuscarUsuarioPorCedula(cedulaLimpia);
+        procesando = true;
 
-        if (usuario != null)
+        try
         {
-            loginRequest.Cedula = cedulaLimpia;
-            loginRequest.Respuesta = string.Empty;
+            var usuario = await UsuariosService.BuscarUsuarioPorCedula(doc);
 
-            preguntaSeguridad = usuario.PreguntaSeguridad?.Pregunta;
-            mostrarSegundaEtapa = true;
-            mensajeClase = "alert alert-info";
-            mensaje = "Usuario encontrado. Responda su pregunta de seguridad.";
+            if (usuario != null)
+            {
+                loginRequest.Cedula = doc;
+                loginRequest.Respuesta = string.Empty;
+                loginRequest.Correo = string.Empty; // limpiamos por si acaso
+
+                preguntaSeguridad = usuario.PreguntaSeguridad?.Pregunta;
+                mostrarSegundaEtapa = true;
+
+                mensajeClase = "alert alert-info";
+                mensaje = "Usuario encontrado. Responda su pregunta de seguridad.";
+            }
+            else
+            {
+                cedulaError = "No se encontró ningún usuario con ese documento.";
+            }
         }
-        else
+        finally
         {
-            cedulaError = "No se encontró ningún usuario con esa cédula.";
+            procesando = false;
         }
     }
 
-
-    // Paso 2: Validar respuesta
+    // Paso 2: Validar respuesta + correo
     private async Task ValidarRespuesta()
     {
         mensaje = "";
-        var loginValido = await UsuariosService.ValidarLogin(loginRequest);
+        procesando = true;
 
-        if (loginValido)
+        try
         {
-            mensajeClase = "alert alert-success";
-            mensaje = "✅ Inicio de sesión exitoso.";
-            // aquí podrías redirigir
+            // Determinar tipo de documento ANTES de llamar al API
+            var tipoDocumento = DetectarTipoDocumento(loginRequest.Cedula);
+            loginRequest.TipoDocumento = tipoDocumento;
 
+            var loginValido = await UsuariosService.ValidarLogin(loginRequest);
+
+            if (loginValido)
+            {
+                // Guardar en sesión para usar en el Dashboard
+                SesionUsuario.IniciarSesion(loginRequest.Cedula, tipoDocumento);
+
+                mensajeClase = "alert alert-success";
+                mensaje = "✅ Inicio de sesión exitoso.";
+
+                Nav.NavigateTo("/dashboard", replace: true);
+            }
+            else
+            {
+                mensajeClase = "alert alert-danger";
+                mensaje = "❌ Datos de validación incorrectos.";
+            }
         }
-        else
+        finally
         {
-            mensajeClase = "alert alert-danger";
-            mensaje = "❌ Respuesta incorrecta.";
+            procesando = false;
         }
+    }
+
+    private string DetectarTipoDocumento(string? documento)
+    {
+        if (string.IsNullOrWhiteSpace(documento))
+            return "0"; // por defecto
+
+        documento = documento.Trim();
+
+        // Regla simple:
+        //  - si contiene alguna letra => pasaporte (1)
+        //  - si solo tiene dígitos, espacios, guiones => cédula (0)
+        return documento.Any(char.IsLetter) ? "1" : "0";
     }
 }

@@ -1,6 +1,7 @@
-﻿using System.Net;
+﻿using ConsultaPto.Shared.Models;
+using ConsultaPto.Shared.SoapDtos;
+using System.Net;
 using System.Net.Http.Json;
-using ConsultaPto.Shared.Models;
 
 namespace ConsultaPto.Client.Services
 {
@@ -20,11 +21,18 @@ namespace ConsultaPto.Client.Services
             return result ?? new List<PreguntaSeguridad>();
         }
 
-        // 🔹 Registrar un nuevo usuario (para Register.razor)
+        // 🔹 Registrar un nuevo usuario (versión simple, si la sigues usando en otros lados)
         public async Task RegistrarUsuario(Usuario usuario)
         {
             var response = await _http.PostAsJsonAsync("api/usuarios", usuario);
             response.EnsureSuccessStatusCode();
+        }
+
+        // 🔹 NUEVO: Registrar usuario devolviendo la HttpResponseMessage
+        //     para poder inspeccionar StatusCode (409, 200, etc.) en Register.razor
+        public async Task<HttpResponseMessage> RegistrarUsuarioResponse(Usuario usuario)
+        {
+            return await _http.PostAsJsonAsync("api/usuarios", usuario);
         }
 
         // 🔹 Buscar usuario por cédula (para login - Paso 1)
@@ -52,6 +60,47 @@ namespace ConsultaPto.Client.Services
         {
             var response = await _http.PostAsJsonAsync("api/usuarios/validar", login);
             return response.IsSuccessStatusCode;
+        }
+
+        // 🔹 Llamar al endpoint actual que tenías para VerificarCliente via JSON
+        public async Task<VerificarClienteSoapResult?> VerificarClienteSoapAsync(string documento, int tipoDocumento)
+        {
+            var requestBody = new
+            {
+                documento,
+                tipoDocumento
+            };
+
+            var response = await _http.PostAsJsonAsync("api/ClientesSoap/verificar-json", requestBody);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // Podrías loggear aquí si quieres más detalle
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<VerificarClienteSoapResult>();
+        }
+
+        // 🔹 Nuevo: consumir el endpoint unificado del dashboard
+        //      POST api/clientes/dashboard
+        public async Task<ConsultaDashboardResponseDto?> ConsultarDashboardAsync(string documento, string tipoDocumento)
+        {
+            var request = new ConsultaDashboardRequestDto
+            {
+                Documento = documento,
+                TipoDocumento = tipoDocumento
+            };
+
+            var response = await _http.PostAsJsonAsync("api/clientes/dashboard", request);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                // Manejo simple: null = algo falló
+                return null;
+            }
+
+            return await response.Content.ReadFromJsonAsync<ConsultaDashboardResponseDto>();
         }
     }
 }

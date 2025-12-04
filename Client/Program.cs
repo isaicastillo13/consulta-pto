@@ -18,5 +18,6 @@ builder.Services.AddScoped(sp => new HttpClient
 
 // ✅ Registrar tu servicio personalizado
 builder.Services.AddScoped<UsuariosService>();
+builder.Services.AddScoped<SesionUsuarioService>();
 
 await builder.Build().RunAsync();
