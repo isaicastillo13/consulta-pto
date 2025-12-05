@@ -9,10 +9,10 @@
 
     <div class="pto-auth-card">
 
-        <div class="pto-auth-step-label">
-            Inicia sesión
+        <div class="pto-auth-step-label d-flex justify-content-center align-items-center">
+            <img class="w-100 h-auto" src="/images/Header.png" alt="Alternate Text" />
         </div>
-        <div class="pto-auth-title">Consulta tus Puntos de Oro</div>
+       
         <div class="pto-auth-subtitle">
             Primero validamos tu documento, luego tu pregunta de seguridad.
         </div>
@@ -112,9 +112,17 @@
                         <span>Iniciar sesión</span>
                     }
                 </button>
+                
             </EditForm>
-        }
 
+        }
+        <div class="mt-1">
+            <span class="text-muted small text-center">
+                ¿Ya te registraste antes?
+                @* Link a la página de inicio de sesión (ruta "/") *@
+                <a href="/register" class="ms-1">Registrarse</a>
+            </span>
+        </div>
     </div>
 </div>
 

@@ -4,6 +4,13 @@
 @inject NavigationManager Nav
 
 <div class="pto-dashboard-wrapper">
+    <!-- 🔹 Botón de Logout -->
+    <div class="pto-dashboard-topbar d-flex justify-content-end mb-3">
+        <button class="btn btn-outline-danger rounded-pill px-4 py-1"
+                @onclick="CerrarSesion">
+            Cerrar sesión
+        </button>
+    </div>
 
     <div class="pto-dashboard-header">
         <h1>Bienvenido @dashboard.PrimerNombre @dashboard.PrimerApellido</h1>
@@ -34,7 +41,7 @@
                     <div class="pto-card-summary-header">
                         <div class="pto-card-summary-title">Puntos totales</div>
                         <div class="pto-card-summary-icon">
-                            ↑
+                            <img src="/icons/arrow-up-circle.svg" alt="Puntos totales" />
                         </div>
                     </div>
 
@@ -54,7 +61,7 @@
                 <div class="pto-card-summary-header">
                     <div class="pto-card-summary-title">Stickers acumulados</div>
                     <div class="pto-card-summary-icon">
-                        →
+                        <img src="/icons/arrow-right-circle.svg" alt="Stickers acumulados" />
                     </div>
                 </div>
 
@@ -69,7 +76,7 @@
                 <div class="pto-card-summary-header">
                     <div class="pto-card-summary-title">Relación Cobrand</div>
                     <div class="pto-card-summary-icon">
-                        ?
+                        <img src="/icons/question-circle.svg" alt="Relación Cobrand" />
                     </div>
                 </div>
 
@@ -86,16 +93,12 @@
                 <div class="pto-card-summary-header">
                     <div class="pto-card-summary-title">Tipo de cliente</div>
                     <div class="pto-card-summary-icon">
-                        ℹ
+                        <img src="/icons/exclamation-circle.svg" alt="Tipo de cliente" />
                     </div>
                 </div>
 
                 <div class="pto-card-summary-value">
                     @TextoCobCliente
-                </div>
-                <div class="pto-card-summary-footer">
-                    N° Cliente: @dashboard.NumeroCliente<br />
-                    N° Cuenta: @dashboard.NumeroCuenta
                 </div>
             </div>
         </div>
@@ -108,14 +111,6 @@
                 <div class="col-12 col-md-4 pto-status-item">
                     <strong>Cliente:</strong>
                     @dashboard.PrimerNombre @dashboard.PrimerApellido
-                </div>
-                <div class="col-12 col-md-4 pto-status-item">
-                    <strong>N° Cliente:</strong>
-                    @dashboard.NumeroCliente
-                </div>
-                <div class="col-12 col-md-4 pto-status-item">
-                    <strong>N° Cuenta:</strong>
-                    @dashboard.NumeroCuenta
                 </div>
 
                 <div class="col-12 col-md-4 pto-status-item mt-2">
@@ -141,6 +136,12 @@
 </div>
 
 @code {
+    private void CerrarSesion()
+    {
+        SesionUsuario.CerrarSesion();
+        Nav.NavigateTo("/", replace: true);
+    }
+
     private bool isLoading = false;
     private string? errorMessage;
     private ConsultaDashboardResponseDto? dashboard;
