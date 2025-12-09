@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "ConsultaPto.Client",
   "resources": {
-    "hash": "sha256-LEAm030NPLeEgLjP5GEno7I0bG17FgO68TS1E55Biss=",
+    "hash": "sha256-Bg3vYcEVkllF4+2nN5bf/OZ7kY6V+r8Y84b4c7BpL0c=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-7j8Y9I6JgJ/4/1qxU6eOJPc3NpvZVd7ILs8OdPuQuTI="
     },
@@ -18,7 +18,7 @@
     },
     "coreAssembly": {},
     "assembly": {
-      "ConsultaPto.Client.wasm": "sha256-AfoqbbC8cMkmDJc1gezkn5rb7dy619g79hZW5giF6gs=",
+      "ConsultaPto.Client.wasm": "sha256-R+iiqrpwqjsV7iBNKmlODacF55oHYg+vDacPEM8Rxm8=",
       "ConsultaPto.Shared.wasm": "sha256-xlP0z5Nj4H0uzSogmthaPXKoaq7rwkkc/pGsnpJuPLs=",
       "Microsoft.AspNetCore.Components.Forms.wasm": "sha256-z2v6MQ6Fiy96r4hERF0SLq4skkuCeZGlDMbQwosxT+A=",
       "Microsoft.AspNetCore.Components.wasm": "sha256-ZmnzkS4eC1fYgJZEL+c3pqEf1KK0Se/xHEDsGuq/i0Q=",
